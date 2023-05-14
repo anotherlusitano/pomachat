@@ -3,20 +3,21 @@ import 'package:my_pap/components/primary_button.dart';
 import 'package:my_pap/components/validated_text_field.dart';
 import 'package:my_pap/constants/layout.dart';
 
-class LoginPage extends StatefulWidget {
+class SignUpPage extends StatefulWidget {
   final Function()? onTap;
-  const LoginPage({
+  const SignUpPage({
     super.key,
     required this.onTap,
   });
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<SignUpPage> createState() => _SignUpPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _SignUpPageState extends State<SignUpPage> {
   final emailTextController = TextEditingController();
   final passwordTextController = TextEditingController();
+  final confirmPasswordTextController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +38,7 @@ class _LoginPageState extends State<LoginPage> {
                     size: 100,
                   ),
                   Text(
-                    'Bem-vindo de volta!',
+                    'Vamos criar uma conta!',
                     style: TextStyle(
                       color: Colors.grey[700],
                     ),
@@ -55,13 +56,19 @@ class _LoginPageState extends State<LoginPage> {
                     obscureText: true,
                   ),
                   const SizedBox(height: 25),
-                  PrimaryButton(onTap: () {}, text: 'Sign In'),
+                  ValidatedTextFormField(
+                    controller: confirmPasswordTextController,
+                    hintText: 'Confirmar palavra-passe',
+                    obscureText: true,
+                  ),
+                  const SizedBox(height: 25),
+                  PrimaryButton(onTap: () {}, text: 'Registar'),
                   const SizedBox(height: 25),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'Ainda não criaste uma conta?',
+                        'Já tens uma conta?',
                         style: TextStyle(
                           color: Colors.grey[700],
                         ),
@@ -70,7 +77,7 @@ class _LoginPageState extends State<LoginPage> {
                       GestureDetector(
                         onTap: widget.onTap,
                         child: const Text(
-                          'Cria agora',
+                          'Entra nela aqui!',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.blue,
