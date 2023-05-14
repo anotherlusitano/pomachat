@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:my_pap/components/primary_button.dart';
 import 'package:my_pap/components/validated_text_field.dart';
@@ -17,6 +18,39 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final emailTextController = TextEditingController();
   final passwordTextController = TextEditingController();
+
+  void signIn() async {
+    showDialog(
+      context: context,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: emailTextController.text,
+        password: passwordTextController.text,
+      );
+
+      //pop loading circule
+      if (context.mounted) Navigator.pop(context);
+    } on FirebaseAuthException catch (e) {
+      // pop loading circule
+      Navigator.pop(context);
+
+      //display error message
+      displayErrorMessage(e.code);
+    }
+  }
+
+  void displayErrorMessage(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(message),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +89,10 @@ class _LoginPageState extends State<LoginPage> {
                     obscureText: true,
                   ),
                   const SizedBox(height: 25),
-                  PrimaryButton(onTap: () {}, text: 'Sign In'),
+                  PrimaryButton(
+                    onTap: signIn,
+                    text: 'Sign In',
+                  ),
                   const SizedBox(height: 25),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -66,11 +103,10 @@ class _LoginPageState extends State<LoginPage> {
                           color: Colors.grey[700],
                         ),
                       ),
-                      const SizedBox(width: 4),
-                      GestureDetector(
-                        onTap: widget.onTap,
+                      TextButton(
+                        onPressed: widget.onTap,
                         child: const Text(
-                          'Cria agora',
+                          'Cria agora!',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.blue,
