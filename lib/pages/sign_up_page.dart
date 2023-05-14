@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:my_pap/components/primary_button.dart';
 import 'package:my_pap/components/validated_text_field.dart';
@@ -18,6 +19,52 @@ class _SignUpPageState extends State<SignUpPage> {
   final emailTextController = TextEditingController();
   final passwordTextController = TextEditingController();
   final confirmPasswordTextController = TextEditingController();
+
+  // sign user up
+  void signUp() async {
+    // show loading circle
+    showDialog(
+      context: context,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+
+    // make sure passwords match
+    if (passwordTextController.text != confirmPasswordTextController.text) {
+      // pop loading circle
+      Navigator.pop(context);
+
+      // show error to user
+      displayErrorMessage('Palavras-passe não são iguais!');
+      return;
+    }
+
+    try {
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: emailTextController.text,
+        password: passwordTextController.text,
+      );
+
+      //pop loading circule
+      if (context.mounted) Navigator.pop(context);
+    } on FirebaseAuthException catch (e) {
+      // pop loading circle
+      Navigator.pop(context);
+
+      // show error to user
+      displayErrorMessage(e.code);
+    }
+  }
+
+  void displayErrorMessage(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(message),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +109,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     obscureText: true,
                   ),
                   const SizedBox(height: 25),
-                  PrimaryButton(onTap: () {}, text: 'Registar'),
+                  PrimaryButton(onTap: signUp, text: 'Registar'),
                   const SizedBox(height: 25),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -73,9 +120,8 @@ class _SignUpPageState extends State<SignUpPage> {
                           color: Colors.grey[700],
                         ),
                       ),
-                      const SizedBox(width: 4),
-                      GestureDetector(
-                        onTap: widget.onTap,
+                      TextButton(
+                        onPressed: widget.onTap,
                         child: const Text(
                           'Entra nela aqui!',
                           style: TextStyle(
