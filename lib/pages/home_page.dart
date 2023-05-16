@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:my_pap/components/message_post.dart';
+import 'package:my_pap/components/validated_text_field.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -12,9 +12,27 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  // sign user out
+  final currentUser = FirebaseAuth.instance.currentUser;
+
+  final textController = TextEditingController();
+
   void signOut() {
     FirebaseAuth.instance.signOut();
+  }
+
+  void postMessage() {
+    if (textController.text.isNotEmpty) {
+      // store in firebase
+      FirebaseFirestore.instance.collection('UserMessages').add({
+        'UserEmail': currentUser!.email,
+        'Message': textController.text,
+        'TimeStamp': Timestamp.now(),
+      });
+    }
+
+    setState(() {
+      textController.clear();
+    });
   }
 
   @override
@@ -22,6 +40,8 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home Page'),
+        backgroundColor: Colors.grey[900],
+        elevation: 0,
         actions: [
           //sign out button
           IconButton(
@@ -29,6 +49,77 @@ class _HomePageState extends State<HomePage> {
             icon: const Icon(Icons.logout),
           ),
         ],
+      ),
+      body: Center(
+        child: Column(
+          children: [
+            // messages
+            Expanded(
+              child: StreamBuilder(
+                stream: FirebaseFirestore.instance
+                    .collection('UserMessages')
+                    .orderBy(
+                      'TimeStamp',
+                      descending: false,
+                    )
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return ListView.builder(
+                      addAutomaticKeepAlives: false,
+                      itemCount: snapshot.data!.docs.length,
+                      itemBuilder: (context, index) {
+                        // get the message
+                        final message = snapshot.data!.docs[index];
+
+                        return MessagePost(
+                          message: message['Message'],
+                          user: message['UserEmail'],
+                        );
+                      },
+                    );
+                  } else if (snapshot.hasError) {
+                    return Center(
+                      child: Text('Error: ${snapshot.error}'),
+                    );
+                  }
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                },
+              ),
+            ),
+
+            // post mesages
+            Padding(
+              padding: const EdgeInsets.all(25),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: ValidatedTextFormField(
+                      controller: textController,
+                      hintText: 'Mensagem',
+                      obscureText: false,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: postMessage,
+                    icon: const Icon(Icons.send),
+                  ),
+                ],
+              ),
+            ),
+
+            //logged in as
+            Text(
+              "Utilizador atual: ${currentUser!.email}",
+              style: const TextStyle(
+                color: Colors.grey,
+              ),
+            ),
+            const SizedBox(height: 50),
+          ],
+        ),
       ),
     );
   }
