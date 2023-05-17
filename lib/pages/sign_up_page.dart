@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:my_pap/components/primary_button.dart';
@@ -41,10 +42,22 @@ class _SignUpPageState extends State<SignUpPage> {
     }
 
     try {
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      // create user
+      UserCredential userCredential =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: emailTextController.text,
         password: passwordTextController.text,
       );
+
+      // after creating the user,
+      // will create a new document in cloud firestore called Users
+      FirebaseFirestore.instance
+          .collection('Users')
+          .doc(userCredential.user!.email)
+          .set({
+        'username': emailTextController.text.split('@')[0],
+        'bio': 'Biografia vazia....',
+      });
 
       //pop loading circule
       if (context.mounted) Navigator.pop(context);
