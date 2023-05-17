@@ -15,28 +15,36 @@ class MainDrawer extends StatelessWidget {
     return Drawer(
       backgroundColor: Colors.grey[900],
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const DrawerHeader(
-            child: Icon(
-              Icons.person,
-              color: Colors.white,
-              size: 64,
+          Column(
+            children: [
+              const DrawerHeader(
+                child: Icon(
+                  Icons.person,
+                  color: Colors.white,
+                  size: 64,
+                ),
+              ),
+              NavList(
+                icon: Icons.home,
+                text: 'H O M E',
+                onTap: () => Navigator.pop(context),
+              ),
+              NavList(
+                icon: Icons.person,
+                text: 'P R O F I L E',
+                onTap: onProfileTap,
+              ),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 25),
+            child: NavList(
+              icon: Icons.logout,
+              text: 'L O G O U T',
+              onTap: onLogoutTap,
             ),
-          ),
-          NavList(
-            icon: Icons.home,
-            text: 'H O M E',
-            onTap: () => Navigator.pop(context),
-          ),
-          NavList(
-            icon: Icons.person,
-            text: 'P R O F I L E',
-            onTap: onProfileTap,
-          ),
-          NavList(
-            icon: Icons.logout,
-            text: 'L O G O U T',
-            onTap: onLogoutTap,
           ),
         ],
       ),
