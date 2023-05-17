@@ -1,8 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:my_pap/components/main_drawer.dart';
 import 'package:my_pap/components/message_post.dart';
 import 'package:my_pap/components/validated_text_field.dart';
+import 'package:my_pap/pages/profile_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -35,20 +37,25 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  void goToProfilePage() {
+    Navigator.pop(context);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const ProfilePage()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home Page'),
         backgroundColor: Colors.grey[900],
-        elevation: 0,
-        actions: [
-          //sign out button
-          IconButton(
-            onPressed: signOut,
-            icon: const Icon(Icons.logout),
-          ),
-        ],
+      ),
+      drawer: MainDrawer(
+        onProfileTap: goToProfilePage,
+        onLogoutTap: signOut,
       ),
       body: Center(
         child: Column(
