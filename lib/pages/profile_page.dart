@@ -13,7 +13,59 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   final currentUser = FirebaseAuth.instance.currentUser;
 
-  Future<void> editField(String field) async {}
+  // all users
+  final usersCollection = FirebaseFirestore.instance.collection('Users');
+
+  Future<void> editField(String field) async {
+    String newValue = "";
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.grey[900],
+        title: Text(
+          'Editar $field',
+          style: const TextStyle(
+            color: Colors.white,
+          ),
+        ),
+        content: TextField(
+          autofocus: true,
+          style: const TextStyle(color: Colors.white),
+          decoration: InputDecoration(
+            hintText: 'Insira um novo $field',
+            hintStyle: const TextStyle(color: Colors.grey),
+          ),
+          onChanged: (value) {
+            newValue = value;
+          },
+        ),
+        actions: [
+          // cancel button
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              'Cancelar',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+
+          // save button
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(newValue),
+            child: const Text(
+              'Salvar',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    // update in firestore
+    if (newValue.trim().isNotEmpty) {
+      await usersCollection.doc(currentUser!.email).update({field: newValue});
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
