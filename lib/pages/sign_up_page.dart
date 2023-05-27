@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:my_pap/components/primary_button.dart';
 import 'package:my_pap/components/validated_text_field.dart';
 import 'package:my_pap/constants/layout.dart';
@@ -157,6 +158,9 @@ class _SignUpPageState extends State<SignUpPage> {
                     hintText: 'Username',
                     obscureText: false,
                     maxLenght: 32,
+                    filters: [
+                      FilteringTextInputFormatter.allow(RegExp('[^#]*')),
+                    ],
                   ),
                   const SizedBox(height: 25),
                   ValidatedTextFormField(

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class ValidatedTextFormField extends StatelessWidget {
   final TextEditingController controller;
   final String hintText;
   final bool obscureText;
   final int maxLenght;
+  final List<TextInputFormatter>? filters;
 
   const ValidatedTextFormField({
     super.key,
@@ -12,6 +14,7 @@ class ValidatedTextFormField extends StatelessWidget {
     required this.hintText,
     required this.obscureText,
     required this.maxLenght,
+    this.filters,
   });
 
   @override
@@ -21,6 +24,7 @@ class ValidatedTextFormField extends StatelessWidget {
       obscureText: obscureText,
       maxLength: maxLenght,
       decoration: InputDecoration(
+        counterText: "",
         enabledBorder: const OutlineInputBorder(
           borderSide: BorderSide(color: Colors.white),
         ),
@@ -32,6 +36,7 @@ class ValidatedTextFormField extends StatelessWidget {
         hintText: hintText,
         hintStyle: TextStyle(color: Colors.grey[500]),
       ),
+      inputFormatters: filters,
     );
   }
 }
