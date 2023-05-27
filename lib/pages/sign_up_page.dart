@@ -19,6 +19,7 @@ class SignUpPage extends StatefulWidget {
 
 class _SignUpPageState extends State<SignUpPage> {
   final emailTextController = TextEditingController();
+  final usernameTextController = TextEditingController();
   final passwordTextController = TextEditingController();
   final confirmPasswordTextController = TextEditingController();
 
@@ -111,6 +112,12 @@ class _SignUpPageState extends State<SignUpPage> {
                   ValidatedTextFormField(
                     controller: emailTextController,
                     hintText: 'Email',
+                    obscureText: false,
+                  ),
+                  const SizedBox(height: 25),
+                  ValidatedTextFormField(
+                    controller: usernameTextController,
+                    hintText: 'Username',
                     obscureText: false,
                   ),
                   const SizedBox(height: 25),
