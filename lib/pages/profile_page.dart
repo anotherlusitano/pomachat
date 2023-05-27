@@ -63,7 +63,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
     // update in firestore
     if (newValue.trim().isNotEmpty) {
-      await usersCollection.doc(currentUser!.email).update({field: newValue});
+      await usersCollection.doc(currentUser!.uid).update({field: newValue});
     }
   }
 
@@ -75,10 +75,7 @@ class _ProfilePageState extends State<ProfilePage> {
         backgroundColor: Colors.grey[900],
       ),
       body: StreamBuilder<DocumentSnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('Users')
-            .doc(currentUser!.email)
-            .snapshots(),
+        stream: FirebaseFirestore.instance.collection('Users').doc(currentUser!.uid).snapshots(),
         builder: (context, snapshot) {
           // get user data
           if (snapshot.hasData) {
