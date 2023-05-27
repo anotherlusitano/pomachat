@@ -81,14 +81,18 @@ class _SignUpPageState extends State<SignUpPage> {
 
     try {
       // create user
-      UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      UserCredential userCredential =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: emailTextController.text,
         password: passwordTextController.text,
       );
 
       // after creating the user,
       // will create a new document in cloud firestore called Users
-      FirebaseFirestore.instance.collection('Users').doc(userCredential.user!.uid).set({
+      FirebaseFirestore.instance
+          .collection('Users')
+          .doc(userCredential.user!.uid)
+          .set({
         'username': usernameTextController.text,
         'discriminator': discriminator,
         'bio': 'Biografia vazia....',
@@ -145,24 +149,28 @@ class _SignUpPageState extends State<SignUpPage> {
                     controller: emailTextController,
                     hintText: 'Email',
                     obscureText: false,
+                    maxLenght: 128,
                   ),
                   const SizedBox(height: 25),
                   ValidatedTextFormField(
                     controller: usernameTextController,
                     hintText: 'Username',
                     obscureText: false,
+                    maxLenght: 32,
                   ),
                   const SizedBox(height: 25),
                   ValidatedTextFormField(
                     controller: passwordTextController,
                     hintText: 'Palavra-passe',
                     obscureText: true,
+                    maxLenght: 64,
                   ),
                   const SizedBox(height: 25),
                   ValidatedTextFormField(
                     controller: confirmPasswordTextController,
                     hintText: 'Confirmar palavra-passe',
                     obscureText: true,
+                    maxLenght: 64,
                   ),
                   const SizedBox(height: 25),
                   PrimaryButton(onTap: signUp, text: 'Registar'),

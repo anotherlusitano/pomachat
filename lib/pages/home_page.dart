@@ -107,6 +107,7 @@ class _HomePageState extends State<HomePage> {
                       controller: textController,
                       hintText: 'Mensagem',
                       obscureText: false,
+                      maxLenght: 4000,
                     ),
                   ),
                   IconButton(

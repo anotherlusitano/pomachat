@@ -81,12 +81,14 @@ class _LoginPageState extends State<LoginPage> {
                     controller: emailTextController,
                     hintText: 'Email',
                     obscureText: false,
+                    maxLenght: 128,
                   ),
                   const SizedBox(height: 25),
                   ValidatedTextFormField(
                     controller: passwordTextController,
                     hintText: 'Palavra-passe',
                     obscureText: true,
+                    maxLenght: 64,
                   ),
                   const SizedBox(height: 25),
                   PrimaryButton(

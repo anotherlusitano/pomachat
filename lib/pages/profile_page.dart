@@ -75,7 +75,10 @@ class _ProfilePageState extends State<ProfilePage> {
         backgroundColor: Colors.grey[900],
       ),
       body: StreamBuilder<DocumentSnapshot>(
-        stream: FirebaseFirestore.instance.collection('Users').doc(currentUser!.uid).snapshots(),
+        stream: FirebaseFirestore.instance
+            .collection('Users')
+            .doc(currentUser!.uid)
+            .snapshots(),
         builder: (context, snapshot) {
           // get user data
           if (snapshot.hasData) {
