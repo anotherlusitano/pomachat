@@ -30,6 +30,17 @@ class _SignUpPageState extends State<SignUpPage> {
     return randomNumber.toString().padLeft(4, '0');
   }
 
+  Future<bool> usernameExistWithDiscriminator() async {
+    final db = FirebaseFirestore.instance.collection('Users');
+
+    QuerySnapshot snapshot = await db
+        .where('username', isEqualTo: usernameTextController.text)
+        .where('discriminator', isEqualTo: discriminator)
+        .get();
+
+    return snapshot.size > 0 ? true : false;
+  }
+
   // sign user up
   void signUp() async {
     // show loading circle
@@ -39,6 +50,24 @@ class _SignUpPageState extends State<SignUpPage> {
         child: CircularProgressIndicator(),
       ),
     );
+
+    if (usernameTextController.text.isEmpty) {
+      // pop loading circle
+      Navigator.pop(context);
+
+      // show error to user
+      displayErrorMessage('Insira um Username!');
+      return;
+    }
+
+    if (await usernameExistWithDiscriminator()) {
+      // pop loading circle
+      Navigator.pop(context);
+
+      // show error to user
+      displayErrorMessage('Esse Username já existe, tente um diferente!');
+      return;
+    }
 
     // make sure passwords match
     if (passwordTextController.text != confirmPasswordTextController.text) {
