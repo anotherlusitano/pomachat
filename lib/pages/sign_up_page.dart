@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +21,13 @@ class _SignUpPageState extends State<SignUpPage> {
   final emailTextController = TextEditingController();
   final passwordTextController = TextEditingController();
   final confirmPasswordTextController = TextEditingController();
+
+  late final String discriminator = generateDiscriminator().toString();
+
+  String generateDiscriminator() {
+    int randomNumber = Random().nextInt(9999 - 1) + 1;
+    return randomNumber.toString().padLeft(4, '0');
+  }
 
   // sign user up
   void signUp() async {
