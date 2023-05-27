@@ -89,8 +89,11 @@ class _SignUpPageState extends State<SignUpPage> {
       // after creating the user,
       // will create a new document in cloud firestore called Users
       FirebaseFirestore.instance.collection('Users').doc(userCredential.user!.uid).set({
-        'username': emailTextController.text.split('@')[0],
+        'username': usernameTextController.text,
+        'discriminator': discriminator,
         'bio': 'Biografia vazia....',
+        'friends': [],
+        'invites': [],
       });
 
       //pop loading circule
