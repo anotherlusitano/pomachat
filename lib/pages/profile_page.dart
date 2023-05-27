@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:my_pap/components/text_box.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -31,13 +32,18 @@ class _ProfilePageState extends State<ProfilePage> {
         content: TextField(
           autofocus: true,
           style: const TextStyle(color: Colors.white),
+          maxLength: 32,
           decoration: InputDecoration(
+            counterText: "",
             hintText: 'Insira um novo $field',
             hintStyle: const TextStyle(color: Colors.grey),
           ),
           onChanged: (value) {
             newValue = value;
           },
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp('[^#]*')),
+          ],
         ),
         actions: [
           // cancel button
