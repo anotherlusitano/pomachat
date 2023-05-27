@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:my_pap/components/main_drawer.dart';
 import 'package:my_pap/components/message_post.dart';
 import 'package:my_pap/components/validated_text_field.dart';
+import 'package:my_pap/pages/friends_page.dart';
 import 'package:my_pap/pages/profile_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -46,6 +47,15 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  void goToFriendsPage() {
+    Navigator.pop(context);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const FriendsPage()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,6 +66,7 @@ class _HomePageState extends State<HomePage> {
       drawer: MainDrawer(
         onProfileTap: goToProfilePage,
         onLogoutTap: signOut,
+        onFriendsTap: goToFriendsPage,
       ),
       body: Center(
         child: Column(

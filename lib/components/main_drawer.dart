@@ -4,10 +4,13 @@ import 'package:my_pap/components/navlist.dart';
 class MainDrawer extends StatelessWidget {
   final void Function() onProfileTap;
   final void Function() onLogoutTap;
+  final void Function() onFriendsTap;
+
   const MainDrawer({
     super.key,
     required this.onProfileTap,
     required this.onLogoutTap,
+    required this.onFriendsTap,
   });
 
   @override
@@ -35,6 +38,11 @@ class MainDrawer extends StatelessWidget {
                 icon: Icons.person,
                 text: 'P R O F I L E',
                 onTap: onProfileTap,
+              ),
+              NavList(
+                icon: Icons.people,
+                text: 'F R I E N D S',
+                onTap: onFriendsTap,
               ),
             ],
           ),
