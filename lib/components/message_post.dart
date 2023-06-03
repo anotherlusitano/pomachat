@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class MessagePost extends StatelessWidget {
   final String message;
   final String user;
+  final String? timestamp;
 
   const MessagePost({
     super.key,
     required this.message,
     required this.user,
+    this.timestamp,
   });
 
   @override
@@ -33,18 +35,31 @@ class MessagePost extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 20),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                user,
-                style: TextStyle(
-                  color: Colors.grey[500],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      user,
+                      style: TextStyle(
+                        color: Colors.grey[500],
+                      ),
+                    ),
+                    Text(
+                      timestamp ?? '',
+                      style: TextStyle(
+                        color: Colors.grey[500],
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 10),
-              Text(message),
-            ],
+                const SizedBox(height: 10),
+                Text(message),
+              ],
+            ),
           ),
         ],
       ),
