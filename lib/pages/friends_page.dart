@@ -19,23 +19,24 @@ class _FriendsPageState extends State<FriendsPage> {
 
   void createPrivateConversation(String friendId) {
     final List<String> userIds = [currentUser!.uid, friendId];
+    userIds.sort();
     final conversationsCollection = FirebaseFirestore.instance.collection('PrivateConversations');
+    conversationsCollection
+        .where('user1', isEqualTo: userIds[0])
+        .where('user2', isEqualTo: userIds[1])
+        .get()
+        .then((querySnapshot) {
+      if (querySnapshot.docs.isNotEmpty) {
+        // Save conversation Id
+        Provider.of<GetPrivateConversationId>(context, listen: false).updateFriendId(querySnapshot.docs[0].id);
+        return;
+      }
 
-    // Send two separate queries to verify if exists that conversatin
-    // (it's two queries because firestore don't allow to use two whereIn)
-    conversationsCollection.where('user1', whereIn: userIds).get().then((querySnapshot1) {
-      conversationsCollection.where('user2', whereIn: userIds).get().then((querySnapshot2) {
-        // if conversation already exist, will end the function
-        if (querySnapshot1.docs.isNotEmpty && querySnapshot2.docs.isNotEmpty) {
-          // Save conversation Id
-          Provider.of<GetPrivateConversationId>(context, listen: false).updateFriendId(querySnapshot2.docs[0].id);
-          return;
-        }
-
-        // Create new document to collection
+      // Create new document to collection
+      else {
         conversationsCollection.add({
-          'user1': currentUser!.uid,
-          'user2': friendId,
+          'user1': userIds[0],
+          'user2': userIds[1],
         }).then(
           (value) {
             // After created, will create an sub collection
@@ -45,7 +46,7 @@ class _FriendsPageState extends State<FriendsPage> {
             Provider.of<GetPrivateConversationId>(context, listen: false).updateFriendId(value.id);
           },
         ).catchError((error) => print('Failed to add conversation: $error'));
-      }).catchError((error) => print('Failed to get querySnapshot2: $error'));
+      }
     }).catchError((error) => print('Failed to get querySnapshot1: $error'));
   }
 
@@ -69,12 +70,12 @@ class _FriendsPageState extends State<FriendsPage> {
 
                     return friendsList.isEmpty
                         ?
-                        /* Widget to show when friends list is empty */
+                        // Widget to show when friends list is empty
                         const Center(
                             child: Text("Não tens amigos :("),
                           )
                         :
-                        /* ListView.builder when there are friends */
+                        // ListView.builder when there are friends
                         ListView.builder(
                             addAutomaticKeepAlives: false,
                             itemCount: friendsList.length,
@@ -90,8 +91,8 @@ class _FriendsPageState extends State<FriendsPage> {
 
                                     return GestureDetector(
                                       onTap: () {
-                                        createPrivateConversation(friendId);
                                         Provider.of<GetFriendId>(context, listen: false).updateFriendId(friendId);
+                                        createPrivateConversation(friendId);
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(builder: (context) => const PrivateConversationPage()),

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class GetPrivateConversationId extends ChangeNotifier {
   String conversationId;
   GetPrivateConversationId({
-    this.conversationId = '',
+    this.conversationId = ' ',
   });
 
   void updateFriendId(String newFriendId) {
