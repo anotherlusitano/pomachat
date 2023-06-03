@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:my_pap/components/message_post.dart';
 import 'package:my_pap/pages/private_conversation_page.dart';
 import 'package:my_pap/providers/get_friend_id.dart';
+import 'package:my_pap/providers/get_private_conversation_id.dart';
 import 'package:provider/provider.dart';
 
 class FriendsPage extends StatefulWidget {
@@ -24,17 +25,26 @@ class _FriendsPageState extends State<FriendsPage> {
     // (it's two queries because firestore don't allow to use two whereIn)
     conversationsCollection.where('user1', whereIn: userIds).get().then((querySnapshot1) {
       conversationsCollection.where('user2', whereIn: userIds).get().then((querySnapshot2) {
+        // if conversation already exist, will end the function
         if (querySnapshot1.docs.isNotEmpty && querySnapshot2.docs.isNotEmpty) {
           // Save conversation Id
-          Provider.of<GetFriendId>(context, listen: false).updateFriendId(querySnapshot2.docs[0].id);
+          Provider.of<GetPrivateConversationId>(context, listen: false).updateFriendId(querySnapshot2.docs[0].id);
           return;
         }
 
-        // Add new document to collection
-        conversationsCollection
-            .add({'user1': currentUser!.uid, 'user2': friendId})
-            .then((value) => print('Conversation added'))
-            .catchError((error) => print('Failed to add conversation: $error'));
+        // Create new document to collection
+        conversationsCollection.add({
+          'user1': currentUser!.uid,
+          'user2': friendId,
+        }).then(
+          (value) {
+            // After created, will create an sub collection
+            conversationsCollection.doc(value.id).collection('Messages');
+
+            // And will save the conversation id
+            Provider.of<GetPrivateConversationId>(context, listen: false).updateFriendId(value.id);
+          },
+        ).catchError((error) => print('Failed to add conversation: $error'));
       }).catchError((error) => print('Failed to get querySnapshot2: $error'));
     }).catchError((error) => print('Failed to get querySnapshot1: $error'));
   }
