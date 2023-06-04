@@ -19,7 +19,23 @@ class _InvitesPageState extends State<InvitesPage> {
 
   addFriend() {}
 
-  acceptInvite(String userId) {}
+  acceptInvite(String userId) {
+    userCollection.update({
+      "friends": FieldValue.arrayUnion([userId])
+    });
+
+    userCollection.update({
+      "invites": FieldValue.arrayRemove([userId])
+    });
+
+    FirebaseFirestore.instance.collection('Users').doc(userId).update({
+      "friends": FieldValue.arrayUnion([currentUser!.uid])
+    });
+
+    FirebaseFirestore.instance.collection('Users').doc(userId).update({
+      "invites": FieldValue.arrayRemove([currentUser!.uid])
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
