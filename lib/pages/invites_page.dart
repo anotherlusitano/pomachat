@@ -16,8 +16,32 @@ class _InvitesPageState extends State<InvitesPage> {
   late final userCollection = FirebaseFirestore.instance.collection('Users').doc(currentUser!.uid);
 
   final inviteController = TextEditingController();
+  final pattern = RegExp(r'^[a-zA-Z0-9]+#\d{4}$');
 
-  addFriend() {}
+  sendInvite() {
+    if (pattern.hasMatch(inviteController.text)) {
+      String username = inviteController.text.split('#')[0];
+      String discriminator = inviteController.text.split('#')[1];
+
+      // store in firebase
+      FirebaseFirestore.instance
+          .collection('Users')
+          .where("username", isEqualTo: username)
+          .where("discriminator", isEqualTo: discriminator)
+          .get()
+          .then(
+        (value) {
+          FirebaseFirestore.instance.collection('Users').doc(value.docs[0].id).update({
+            'invites': FieldValue.arrayUnion([currentUser!.uid]),
+          });
+        },
+      ).catchError((error) => print('Error: $error'));
+    }
+
+    setState(() {
+      inviteController.clear();
+    });
+  }
 
   acceptInvite(String userId) {
     userCollection.update({
@@ -99,6 +123,37 @@ class _InvitesPageState extends State<InvitesPage> {
                   }
                   return const SizedBox.shrink();
                 },
+              ),
+            ),
+            Footer(
+              child: TextField(
+                maxLength: 37,
+                controller: inviteController,
+                decoration: InputDecoration(
+                  hintText: "Insira o seu amigo, ex: john#9999",
+                  counterText: '',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: const BorderSide(
+                      color: Colors.black,
+                      width: 1,
+                      style: BorderStyle.solid,
+                    ),
+                  ),
+                  suffixIcon: Container(
+                    margin: const EdgeInsets.all(8),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(100, 50),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30.0),
+                        ),
+                      ),
+                      onPressed: sendInvite,
+                      child: const Text("Enviar pedido de amizade"),
+                    ),
+                  ),
+                ),
               ),
             ),
           ],
