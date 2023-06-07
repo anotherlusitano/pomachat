@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:my_pap/components/message_post.dart';
+import 'package:my_pap/components/profile_list_item.dart';
 import 'package:my_pap/pages/private_conversation_page.dart';
 import 'package:my_pap/providers/get_friend_id.dart';
 import 'package:my_pap/providers/get_private_conversation_id.dart';
@@ -98,9 +99,9 @@ class _FriendsPageState extends State<FriendsPage> {
                                           MaterialPageRoute(builder: (context) => const PrivateConversationPage()),
                                         );
                                       },
-                                      child: MessagePost(
-                                        message: bio,
-                                        user: "$username#$discriminator",
+                                      child: ProfileListItem(
+                                        bio: bio,
+                                        username: "$username#$discriminator",
                                       ),
                                     );
                                   } else if (snapshot.connectionState == ConnectionState.waiting) {

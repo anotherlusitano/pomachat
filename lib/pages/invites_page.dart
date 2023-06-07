@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:my_pap/components/message_post.dart';
 import 'package:footer/footer.dart';
+import 'package:my_pap/components/profile_list_item.dart';
 
 class InvitesPage extends StatefulWidget {
   const InvitesPage({super.key});
@@ -102,9 +103,9 @@ class _InvitesPageState extends State<InvitesPage> {
 
                                     return GestureDetector(
                                       onTap: () => acceptInvite(userId),
-                                      child: MessagePost(
-                                        message: bio,
-                                        user: "$username#$discriminator",
+                                      child: ProfileListItem(
+                                        bio: bio,
+                                        username: "$username#$discriminator",
                                       ),
                                     );
                                   } else if (snapshot.connectionState == ConnectionState.waiting) {

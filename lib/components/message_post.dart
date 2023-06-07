@@ -3,14 +3,32 @@ import 'package:flutter/material.dart';
 class MessagePost extends StatelessWidget {
   final String message;
   final String user;
+  final String currentUser;
   final String? timestamp;
+  final VoidCallback? deleteMessage;
 
   const MessagePost({
     super.key,
     required this.message,
     required this.user,
-    this.timestamp,
+    required this.currentUser,
+    required this.timestamp,
+    required this.deleteMessage,
   });
+
+  Widget isUserMessage() {
+    if (user == currentUser) {
+      return IconButton(
+        onPressed: deleteMessage,
+        icon: const Icon(
+          Icons.delete,
+          color: Colors.red,
+        ),
+      );
+    } else {
+      return const SizedBox.shrink();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,11 +66,16 @@ class MessagePost extends StatelessWidget {
                         color: Colors.grey[500],
                       ),
                     ),
-                    Text(
-                      timestamp ?? '',
-                      style: TextStyle(
-                        color: Colors.grey[500],
-                      ),
+                    Row(
+                      children: [
+                        Text(
+                          timestamp ?? '',
+                          style: TextStyle(
+                            color: Colors.grey[500],
+                          ),
+                        ),
+                        isUserMessage(),
+                      ],
                     ),
                   ],
                 ),

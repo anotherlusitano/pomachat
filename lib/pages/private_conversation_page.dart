@@ -41,7 +41,6 @@ class _PrivateConversationPageState extends State<PrivateConversationPage> {
   String getUsername() {
     try {
       FirebaseFirestore.instance.collection('Users').doc(currentUser!.uid).get().then((value) {
-        print(value['username']);
         return value['username'];
       });
     } catch (e) {
@@ -93,6 +92,19 @@ class _PrivateConversationPageState extends State<PrivateConversationPage> {
                           message: message['message'],
                           user: message['user'],
                           timestamp: formattedDate,
+                          currentUser: getUsername(),
+                          deleteMessage: () {
+                            FirebaseFirestore.instance
+                                .collection('PrivateConversations')
+                                .doc(conversationId)
+                                .collection('Messages')
+                                .doc(message.id)
+                                .delete()
+                                .then(
+                                  (value) => print('Mensagem deletada com sucesso'),
+                                  onError: (e) => print("Erro ao deletar mensagem $e"),
+                                );
+                          },
                         );
                       },
                     );
