@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:my_pap/components/main_drawer.dart';
 import 'package:my_pap/pages/friends_page.dart';
+import 'package:my_pap/pages/groups_page.dart';
 import 'package:my_pap/pages/invites_page.dart';
 import 'package:my_pap/pages/profile_page.dart';
 
@@ -44,7 +45,7 @@ class _HomePageState extends State<HomePage> {
 
     final List<Widget> pages = [
       const InvitesPage(),
-      const HomePage(),
+      const GroupsPage(),
       const FriendsPage(),
     ];
 
@@ -79,7 +80,7 @@ class _HomePageState extends State<HomePage> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.chat),
-            label: 'Conversas',
+            label: 'Grupos',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.people),
