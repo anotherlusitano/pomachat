@@ -2,6 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:my_pap/components/group_list_item.dart';
+import 'package:my_pap/pages/group_conversation_page.dart';
+import 'package:my_pap/providers/get_group_id.dart';
+import 'package:provider/provider.dart';
 
 class GroupsPage extends StatefulWidget {
   const GroupsPage({super.key});
@@ -39,9 +42,14 @@ class _GroupsPageState extends State<GroupsPage> {
                         itemCount: snapshot.data!.docs.length,
                         itemBuilder: (context, index) {
                           final group = snapshot.data!.docs[index].data();
+                          final String groupId = snapshot.data!.docs[index].id;
                           return GestureDetector(
                             onTap: () {
-                              Navigator.pop(context);
+                              Provider.of<GetGroupId>(context, listen: false).updateGroupId(groupId);
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => const GroupConversationPage()),
+                              );
                             },
                             child: GroupListItem(
                               pictureUrl: group['icon_group'],
