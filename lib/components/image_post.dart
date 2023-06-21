@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_downloader_web/image_downloader_web.dart';
 
 class ImagePost extends StatelessWidget {
   final String imageUrl;
@@ -82,8 +83,30 @@ class ImagePost extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 10),
-                  Image.network(
-                    imageUrl,
+                  SizedBox(
+                    child: Stack(
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Image.network(imageUrl),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(4),
+                              color: Colors.white,
+                            ),
+                            child: IconButton(
+                              onPressed: () async => await WebImageDownloader.downloadImageFromWeb(imageUrl),
+                              icon: const Icon(Icons.download),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
