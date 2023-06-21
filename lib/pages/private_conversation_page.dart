@@ -4,6 +4,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:my_pap/components/file_post.dart';
 import 'package:my_pap/components/image_post.dart';
 import 'package:my_pap/components/message_post.dart';
 import 'package:my_pap/components/validated_text_field.dart';
@@ -113,25 +114,58 @@ class _PrivateConversationPageState extends State<PrivateConversationPage> {
 
                         if (message['message']
                             .contains("https://firebasestorage.googleapis.com/v0/b/pap-gpsi.appspot.com/o/")) {
-                          return ImagePost(
-                            imageUrl: message['message'],
-                            user: message['user'],
-                            timestamp: formattedDate,
-                            currentUser: getUsername(),
-                            deleteMessage: () {
-                              FirebaseFirestore.instance
-                                  .collection('PrivateConversations')
-                                  .doc(conversationId)
-                                  .collection('Messages')
-                                  .doc(message.id)
-                                  .delete()
-                                  .then(
-                                    (value) => print('Image deletada com sucesso'),
-                                    onError: (e) => print("Erro ao deletar imagem $e"),
-                                  )
-                                  .then((value) => ref.delete());
-                            },
-                          );
+                          Uri uri = Uri.parse(message['message']);
+                          String path = uri.path;
+
+                          // Get the filename from the path
+                          String fileName = path.substring(path.lastIndexOf('/') + 1);
+
+                          // Get the extension of the file
+                          String extension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
+
+                          List<String> imageFormats = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'wbmp'];
+
+                          if (imageFormats.contains(extension)) {
+                            return ImagePost(
+                              imageUrl: message['message'],
+                              user: message['user'],
+                              timestamp: formattedDate,
+                              currentUser: getUsername(),
+                              deleteMessage: () {
+                                FirebaseFirestore.instance
+                                    .collection('PrivateConversations')
+                                    .doc(conversationId)
+                                    .collection('Messages')
+                                    .doc(message.id)
+                                    .delete()
+                                    .then(
+                                      (value) => print('Image deletada com sucesso'),
+                                      onError: (e) => print("Erro ao deletar imagem $e"),
+                                    )
+                                    .then((value) => ref.delete());
+                              },
+                            );
+                          } else {
+                            return FilePost(
+                              fileUrl: message['message'],
+                              user: message['user'],
+                              timestamp: formattedDate,
+                              currentUser: getUsername(),
+                              deleteMessage: () {
+                                FirebaseFirestore.instance
+                                    .collection('PrivateConversations')
+                                    .doc(conversationId)
+                                    .collection('Messages')
+                                    .doc(message.id)
+                                    .delete()
+                                    .then(
+                                      (value) => print('Image deletada com sucesso'),
+                                      onError: (e) => print("Erro ao deletar imagem $e"),
+                                    )
+                                    .then((value) => ref.delete());
+                              },
+                            );
+                          }
                         }
 
                         return MessagePost(
