@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:my_pap/components/image_post.dart';
 import 'package:my_pap/components/message_post.dart';
 import 'package:my_pap/components/validated_text_field.dart';
+import 'package:my_pap/pages/room_page.dart';
 import 'package:my_pap/providers/get_private_conversation_id.dart';
 import 'package:provider/provider.dart';
 
@@ -66,6 +67,22 @@ class _PrivateConversationPageState extends State<PrivateConversationPage> {
       appBar: AppBar(
         title: const Text('Private Conversation'),
         backgroundColor: Colors.grey[900],
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.call),
+            tooltip: 'Fazer chamada',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Room(
+                    conversationId: conversationId!,
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: Center(
         child: Column(
