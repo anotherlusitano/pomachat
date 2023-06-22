@@ -1,7 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:my_pap/components/profile_picture.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class FilePost extends StatelessWidget {
+class FilePost extends StatefulWidget {
   final String fileUrl;
   final String user;
   final String currentUser;
@@ -17,10 +19,32 @@ class FilePost extends StatelessWidget {
     required this.deleteMessage,
   });
 
+  @override
+  State<FilePost> createState() => _FilePostState();
+}
+
+class _FilePostState extends State<FilePost> {
+  String username = '';
+  String profilePicture = '';
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUserData();
+  }
+
+  Future<void> fetchUserData() async {
+    final user = await FirebaseFirestore.instance.collection('Users').doc(widget.user).get();
+    setState(() {
+      username = "${user['username']}#${user['discriminator']}";
+      profilePicture = user['profilePicture'] ?? '';
+    });
+  }
+
   Widget isUserMessage() {
-    if (user == currentUser) {
+    if (widget.user == widget.currentUser) {
       return IconButton(
-        onPressed: deleteMessage,
+        onPressed: widget.deleteMessage,
         icon: const Icon(
           Icons.delete,
           color: Colors.red,
@@ -52,17 +76,7 @@ class FilePost extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.grey[400],
-                shape: BoxShape.circle,
-              ),
-              padding: const EdgeInsets.all(10),
-              child: const Icon(
-                Icons.person,
-                color: Colors.white,
-              ),
-            ),
+            ProfilePicture(profilePictureUrl: profilePicture, size: 60),
             const SizedBox(width: 20),
             Expanded(
               child: Column(
@@ -72,7 +86,7 @@ class FilePost extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        user,
+                        username,
                         style: TextStyle(
                           color: Colors.grey[500],
                         ),
@@ -80,7 +94,7 @@ class FilePost extends StatelessWidget {
                       Row(
                         children: [
                           Text(
-                            timestamp ?? '',
+                            widget.timestamp ?? '',
                             style: TextStyle(
                               color: Colors.grey[500],
                             ),
@@ -100,7 +114,7 @@ class FilePost extends StatelessWidget {
                     ),
                     child: GestureDetector(
                       onTap: () async {
-                        final Uri url = Uri.parse(fileUrl);
+                        final Uri url = Uri.parse(widget.fileUrl);
                         if (!await launchUrl(url)) {
                           throw Exception('Could not launch $url');
                         }
@@ -118,7 +132,7 @@ class FilePost extends StatelessWidget {
                           SizedBox(
                             width: 240,
                             child: Text(
-                              getNameOfFile(fileUrl),
+                              getNameOfFile(widget.fileUrl),
                               maxLines: 4,
                               style: const TextStyle(
                                 color: Colors.white,
