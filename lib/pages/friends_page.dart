@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:my_pap/components/message_post.dart';
 import 'package:my_pap/components/profile_list_item.dart';
 import 'package:my_pap/pages/private_conversation_page.dart';
 import 'package:my_pap/providers/get_friend_id.dart';
@@ -89,6 +88,7 @@ class _FriendsPageState extends State<FriendsPage> {
                                     final username = snapshot.data!['username'];
                                     final bio = snapshot.data!['bio'];
                                     final discriminator = snapshot.data!['discriminator'];
+                                    final pictureUrl = snapshot.data!['profilePicture'];
 
                                     return GestureDetector(
                                       onTap: () {
@@ -102,6 +102,7 @@ class _FriendsPageState extends State<FriendsPage> {
                                       child: ProfileListItem(
                                         bio: bio,
                                         username: "$username#$discriminator",
+                                        pictureUrl: pictureUrl,
                                       ),
                                     );
                                   } else if (snapshot.connectionState == ConnectionState.waiting) {
