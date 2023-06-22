@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:my_pap/components/profile_picture.dart';
 import 'package:my_pap/components/text_box.dart';
 
@@ -14,6 +16,8 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   final currentUser = FirebaseAuth.instance.currentUser;
+
+  late Reference ref;
 
   // all users
   final usersCollection = FirebaseFirestore.instance.collection('Users');
@@ -74,6 +78,49 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  void changeProfilePicture() async {
+    // Create a new instance of the ImagePicker
+    final ImagePicker picker = ImagePicker();
+
+    // Call this method to get an image from the user's device
+    final image = await picker.pickImage(source: ImageSource.gallery);
+
+    if (image != null) {
+      // Read the image file as bytes
+      final fileBytes = await image.readAsBytes();
+
+      // Create a reference to a file in Firebase Cloud Storage
+      final storageReference =
+          FirebaseStorage.instance.ref().child("${DateTime.now().microsecondsSinceEpoch}${image.name}");
+
+      // Upload the image file
+      final uploadTask = storageReference.putData(fileBytes);
+      final snapshot = await uploadTask.whenComplete(() {});
+
+      // Get the download URL of the uploaded image
+      String downloadUrl = await snapshot.ref.getDownloadURL();
+
+      // Delete the previous profile picture from Cloud Storage
+      String previousImageUrl = await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(currentUser!.uid)
+          .get()
+          .then((snapshot) => snapshot.data()!['profilePicture']);
+
+      if (previousImageUrl.isNotEmpty) {
+        FirebaseStorage.instance.refFromURL(previousImageUrl).delete();
+      }
+
+      // Update the user document in Firestore with the new profile picture URL
+      await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(currentUser!.uid)
+          .update({'profilePicture': downloadUrl});
+    } else {
+      print('No Image Path Received');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -93,15 +140,39 @@ class _ProfilePageState extends State<ProfilePage> {
                 const SizedBox(height: 49),
 
                 // profile pic
-                ProfilePicture(
-                  profilePictureUrl: userData['profilePicture'],
-                  size: 200,
+                Center(
+                  child: SizedBox(
+                    width: 200,
+                    height: 200,
+                    child: Stack(
+                      children: [
+                        ProfilePicture(
+                          profilePictureUrl: userData['profilePicture'],
+                          size: 200,
+                        ),
+                        Align(
+                          alignment: Alignment.bottomRight,
+                          child: SizedBox(
+                            width: 54,
+                            height: 54,
+                            child: IconButton(
+                              onPressed: changeProfilePicture,
+                              icon: const Icon(
+                                Icons.add_photo_alternate,
+                                size: 54,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
 
                 const SizedBox(height: 9),
 
                 Text(
-                  currentUser!.email.toString(),
+                  "${userData['username']}#${userData['discriminator']}",
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Colors.grey[699],
