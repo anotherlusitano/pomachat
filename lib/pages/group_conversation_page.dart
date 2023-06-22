@@ -27,13 +27,15 @@ class _GroupConversationPageState extends State<GroupConversationPage> {
 
   String? groupId;
 
+  late String profilePicture;
+
   late Reference ref;
 
   void postMessage() {
     if (textController.text.trim().isNotEmpty) {
       // store in firebase
       FirebaseFirestore.instance.collection('Groups').doc(groupId).collection('Messages').add({
-        'user': getUsername(),
+        'user': currentUser!.uid,
         'message': textController.text,
         'timeStamp': Timestamp.now(),
       });
@@ -42,17 +44,6 @@ class _GroupConversationPageState extends State<GroupConversationPage> {
     setState(() {
       textController.clear();
     });
-  }
-
-  String getUsername() {
-    try {
-      FirebaseFirestore.instance.collection('Users').doc(currentUser!.uid).get().then((value) {
-        return value['username'];
-      });
-    } catch (e) {
-      print('error');
-    }
-    return currentUser!.email!.split('@')[0];
   }
 
   @override
@@ -80,13 +71,14 @@ class _GroupConversationPageState extends State<GroupConversationPage> {
                     .collection('Messages')
                     .orderBy(
                       'timeStamp',
-                      descending: false,
+                      descending: true,
                     )
                     .snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     return ListView.builder(
                       addAutomaticKeepAlives: false,
+                      reverse: true,
                       itemCount: snapshot.data!.docs.length,
                       itemBuilder: (context, index) {
                         // get the message
@@ -113,7 +105,7 @@ class _GroupConversationPageState extends State<GroupConversationPage> {
                               imageUrl: message['message'],
                               user: message['user'],
                               timestamp: formattedDate,
-                              currentUser: getUsername(),
+                              currentUser: currentUser!.uid,
                               deleteMessage: () {
                                 FirebaseFirestore.instance
                                     .collection('Groups')
@@ -133,7 +125,7 @@ class _GroupConversationPageState extends State<GroupConversationPage> {
                               fileUrl: message['message'],
                               user: message['user'],
                               timestamp: formattedDate,
-                              currentUser: getUsername(),
+                              currentUser: currentUser!.uid,
                               deleteMessage: () {
                                 FirebaseFirestore.instance
                                     .collection('Groups')
@@ -155,7 +147,7 @@ class _GroupConversationPageState extends State<GroupConversationPage> {
                           message: message['message'],
                           user: message['user'],
                           timestamp: formattedDate,
-                          currentUser: getUsername(),
+                          currentUser: currentUser!.uid,
                           deleteMessage: () {
                             FirebaseFirestore.instance
                                 .collection('Groups')
@@ -224,7 +216,7 @@ class _GroupConversationPageState extends State<GroupConversationPage> {
 
                         //Upload to Firebase
                         FirebaseFirestore.instance.collection('Groups').doc(groupId).collection('Messages').add({
-                          'user': getUsername(),
+                          'user': currentUser!.uid,
                           'message': downloadUrl,
                           'timeStamp': Timestamp.now(),
                         });
@@ -241,15 +233,6 @@ class _GroupConversationPageState extends State<GroupConversationPage> {
                 ],
               ),
             ),
-
-            //logged in as
-            Text(
-              "Utilizador atual: ${currentUser!.email}",
-              style: const TextStyle(
-                color: Colors.grey,
-              ),
-            ),
-            const SizedBox(height: 50),
           ],
         ),
       ),
