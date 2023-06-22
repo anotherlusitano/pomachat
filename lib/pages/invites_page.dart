@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:my_pap/components/message_post.dart';
 import 'package:footer/footer.dart';
 import 'package:my_pap/components/profile_list_item.dart';
 
@@ -100,12 +99,14 @@ class _InvitesPageState extends State<InvitesPage> {
                                     final username = snapshot.data!['username'];
                                     final bio = snapshot.data!['bio'];
                                     final discriminator = snapshot.data!['discriminator'];
+                                    final pictureUrl = snapshot.data!['profilePicture'];
 
                                     return GestureDetector(
                                       onTap: () => acceptInvite(userId),
                                       child: ProfileListItem(
                                         bio: bio,
                                         username: "$username#$discriminator",
+                                        pictureUrl: pictureUrl,
                                       ),
                                     );
                                   } else if (snapshot.connectionState == ConnectionState.waiting) {
