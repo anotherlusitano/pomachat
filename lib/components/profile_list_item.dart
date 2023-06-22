@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:my_pap/components/profile_picture.dart';
 
 class ProfileListItem extends StatelessWidget {
   final String bio;
   final String username;
+  final String pictureUrl;
 
   const ProfileListItem({
     super.key,
     required this.bio,
     required this.username,
+    required this.pictureUrl,
   });
 
   @override
@@ -21,17 +24,7 @@ class ProfileListItem extends StatelessWidget {
       padding: const EdgeInsets.all(25),
       child: Row(
         children: [
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.grey[400],
-              shape: BoxShape.circle,
-            ),
-            padding: const EdgeInsets.all(10),
-            child: const Icon(
-              Icons.person,
-              color: Colors.white,
-            ),
-          ),
+          ProfilePicture(profilePictureUrl: pictureUrl, size: 40),
           const SizedBox(width: 20),
           Expanded(
             child: Column(
