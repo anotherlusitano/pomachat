@@ -82,21 +82,18 @@ class _SignUpPageState extends State<SignUpPage> {
 
     try {
       // create user
-      UserCredential userCredential =
-          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: emailTextController.text,
         password: passwordTextController.text,
       );
 
       // after creating the user,
       // will create a new document in cloud firestore called Users
-      FirebaseFirestore.instance
-          .collection('Users')
-          .doc(userCredential.user!.uid)
-          .set({
+      FirebaseFirestore.instance.collection('Users').doc(userCredential.user!.uid).set({
         'username': usernameTextController.text,
         'discriminator': discriminator,
         'bio': 'Biografia vazia....',
+        'profilePicture': '',
         'friends': [],
         'invites': [],
       });
