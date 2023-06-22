@@ -34,7 +34,7 @@ class _PrivateConversationPageState extends State<PrivateConversationPage> {
     if (textController.text.trim().isNotEmpty) {
       // store in firebase
       FirebaseFirestore.instance.collection('PrivateConversations').doc(conversationId).collection('Messages').add({
-        'user': getUsername(),
+        'user': currentUser!.uid,
         'message': textController.text,
         'timeStamp': Timestamp.now(),
       });
@@ -43,17 +43,6 @@ class _PrivateConversationPageState extends State<PrivateConversationPage> {
     setState(() {
       textController.clear();
     });
-  }
-
-  String getUsername() {
-    try {
-      FirebaseFirestore.instance.collection('Users').doc(currentUser!.uid).get().then((value) {
-        return value['username'];
-      });
-    } catch (e) {
-      print('error');
-    }
-    return currentUser!.email!.split('@')[0];
   }
 
   @override
@@ -97,13 +86,14 @@ class _PrivateConversationPageState extends State<PrivateConversationPage> {
                     .collection('Messages')
                     .orderBy(
                       'timeStamp',
-                      descending: false,
+                      descending: true,
                     )
                     .snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     return ListView.builder(
                       addAutomaticKeepAlives: false,
+                      reverse: true,
                       itemCount: snapshot.data!.docs.length,
                       itemBuilder: (context, index) {
                         // get the message
@@ -130,7 +120,7 @@ class _PrivateConversationPageState extends State<PrivateConversationPage> {
                               imageUrl: message['message'],
                               user: message['user'],
                               timestamp: formattedDate,
-                              currentUser: getUsername(),
+                              currentUser: currentUser!.uid,
                               deleteMessage: () {
                                 FirebaseFirestore.instance
                                     .collection('PrivateConversations')
@@ -150,7 +140,7 @@ class _PrivateConversationPageState extends State<PrivateConversationPage> {
                               fileUrl: message['message'],
                               user: message['user'],
                               timestamp: formattedDate,
-                              currentUser: getUsername(),
+                              currentUser: currentUser!.uid,
                               deleteMessage: () {
                                 FirebaseFirestore.instance
                                     .collection('PrivateConversations')
@@ -167,12 +157,11 @@ class _PrivateConversationPageState extends State<PrivateConversationPage> {
                             );
                           }
                         }
-
                         return MessagePost(
                           message: message['message'],
                           user: message['user'],
                           timestamp: formattedDate,
-                          currentUser: getUsername(),
+                          currentUser: currentUser!.uid,
                           deleteMessage: () {
                             FirebaseFirestore.instance
                                 .collection('PrivateConversations')
@@ -245,7 +234,7 @@ class _PrivateConversationPageState extends State<PrivateConversationPage> {
                             .doc(conversationId)
                             .collection('Messages')
                             .add({
-                          'user': getUsername(),
+                          'user': currentUser!.uid,
                           'message': downloadUrl,
                           'timeStamp': Timestamp.now(),
                         });
@@ -262,15 +251,6 @@ class _PrivateConversationPageState extends State<PrivateConversationPage> {
                 ],
               ),
             ),
-
-            //logged in as
-            Text(
-              "Utilizador atual: ${currentUser!.email}",
-              style: const TextStyle(
-                color: Colors.grey,
-              ),
-            ),
-            const SizedBox(height: 50),
           ],
         ),
       ),
