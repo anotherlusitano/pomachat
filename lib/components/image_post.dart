@@ -1,7 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:image_downloader_web/image_downloader_web.dart';
+import 'package:my_pap/components/profile_picture.dart';
 
-class ImagePost extends StatelessWidget {
+class ImagePost extends StatefulWidget {
   final String imageUrl;
   final String user;
   final String currentUser;
@@ -17,10 +19,32 @@ class ImagePost extends StatelessWidget {
     required this.deleteMessage,
   });
 
+  @override
+  State<ImagePost> createState() => _ImagePostState();
+}
+
+class _ImagePostState extends State<ImagePost> {
+  String username = '';
+  String profilePicture = '';
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUserData();
+  }
+
+  Future<void> fetchUserData() async {
+    final user = await FirebaseFirestore.instance.collection('Users').doc(widget.user).get();
+    setState(() {
+      username = "${user['username']}#${user['discriminator']}";
+      profilePicture = user['profilePicture'] ?? '';
+    });
+  }
+
   Widget isUserMessage() {
-    if (user == currentUser) {
+    if (widget.user == widget.currentUser) {
       return IconButton(
-        onPressed: deleteMessage,
+        onPressed: widget.deleteMessage,
         icon: const Icon(
           Icons.delete,
           color: Colors.red,
@@ -44,17 +68,7 @@ class ImagePost extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.grey[400],
-                shape: BoxShape.circle,
-              ),
-              padding: const EdgeInsets.all(10),
-              child: const Icon(
-                Icons.person,
-                color: Colors.white,
-              ),
-            ),
+            ProfilePicture(profilePictureUrl: profilePicture, size: 60),
             const SizedBox(width: 20),
             Expanded(
               child: Column(
@@ -64,7 +78,7 @@ class ImagePost extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        user,
+                        username,
                         style: TextStyle(
                           color: Colors.grey[500],
                         ),
@@ -72,7 +86,7 @@ class ImagePost extends StatelessWidget {
                       Row(
                         children: [
                           Text(
-                            timestamp ?? '',
+                            widget.timestamp ?? '',
                             style: TextStyle(
                               color: Colors.grey[500],
                             ),
@@ -90,7 +104,7 @@ class ImagePost extends StatelessWidget {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(4),
                           ),
-                          child: Image.network(imageUrl),
+                          child: Image.network(widget.imageUrl),
                         ),
                         Padding(
                           padding: const EdgeInsets.all(8.0),
@@ -100,7 +114,7 @@ class ImagePost extends StatelessWidget {
                               color: Colors.white,
                             ),
                             child: IconButton(
-                              onPressed: () async => await WebImageDownloader.downloadImageFromWeb(imageUrl),
+                              onPressed: () async => await WebImageDownloader.downloadImageFromWeb(widget.imageUrl),
                               icon: const Icon(Icons.download),
                             ),
                           ),
