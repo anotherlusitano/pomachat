@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_pap/components/profile_picture.dart';
 
 class GroupListItem extends StatelessWidget {
   final String bio;
@@ -25,14 +26,7 @@ class GroupListItem extends StatelessWidget {
       padding: const EdgeInsets.all(25),
       child: Row(
         children: [
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.grey[400],
-              shape: BoxShape.circle,
-            ),
-            padding: const EdgeInsets.all(10),
-            child: pictureUrl.isNotEmpty ? GroupImage(pictureUrl: pictureUrl) : const GroupIcon(),
-          ),
+          ProfilePicture(profilePictureUrl: pictureUrl, size: 40),
           const SizedBox(width: 20),
           Expanded(
             child: Column(
@@ -65,40 +59,6 @@ class GroupListItem extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class GroupImage extends StatelessWidget {
-  const GroupImage({
-    super.key,
-    required this.pictureUrl,
-  });
-
-  final String pictureUrl;
-
-  @override
-  Widget build(BuildContext context) {
-    return Image.network(
-      pictureUrl,
-      height: 40,
-      width: 40,
-      filterQuality: FilterQuality.high,
-    );
-  }
-}
-
-class GroupIcon extends StatelessWidget {
-  const GroupIcon({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return const Icon(
-      Icons.people,
-      size: 40,
-      color: Colors.white,
     );
   }
 }
