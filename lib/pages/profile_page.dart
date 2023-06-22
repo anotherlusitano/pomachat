@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:my_pap/components/profile_picture.dart';
 import 'package:my_pap/components/text_box.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -81,23 +82,20 @@ class _ProfilePageState extends State<ProfilePage> {
         backgroundColor: Colors.grey[900],
       ),
       body: StreamBuilder<DocumentSnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('Users')
-            .doc(currentUser!.uid)
-            .snapshots(),
+        stream: FirebaseFirestore.instance.collection('Users').doc(currentUser!.uid).snapshots(),
         builder: (context, snapshot) {
           // get user data
           if (snapshot.hasData) {
             final userData = snapshot.data!.data() as Map<String, dynamic>;
 
-            return ListView(
+            return Column(
               children: [
                 const SizedBox(height: 49),
 
                 // profile pic
-                const Icon(
-                  Icons.person,
-                  size: 71,
+                ProfilePicture(
+                  profilePictureUrl: userData['profilePicture'],
+                  size: 200,
                 ),
 
                 const SizedBox(height: 9),
@@ -133,23 +131,11 @@ class _ProfilePageState extends State<ProfilePage> {
                   sectionName: 'bio',
                   onPressed: () => editField('bio'),
                 ),
-
-                const SizedBox(height: 49),
-
-                Padding(
-                  padding: const EdgeInsets.only(left: 24),
-                  child: Text(
-                    'Os meus detalhes',
-                    style: TextStyle(
-                      color: Colors.grey[599],
-                    ),
-                  ),
-                ),
               ],
             );
           } else if (snapshot.hasError) {
             return Center(
-              child: Text('Error ${snapshot.error}'),
+              child: Text('Erro: ${snapshot.error}'),
             );
           }
 
