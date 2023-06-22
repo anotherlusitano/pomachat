@@ -1,6 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:my_pap/components/profile_picture.dart';
 
-class MessagePost extends StatelessWidget {
+class MessagePost extends StatefulWidget {
   final String message;
   final String user;
   final String currentUser;
@@ -16,10 +18,32 @@ class MessagePost extends StatelessWidget {
     required this.deleteMessage,
   });
 
+  @override
+  State<MessagePost> createState() => _MessagePostState();
+}
+
+class _MessagePostState extends State<MessagePost> {
+  String username = '';
+  String profilePicture = '';
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUserData();
+  }
+
+  Future<void> fetchUserData() async {
+    final user = await FirebaseFirestore.instance.collection('Users').doc(widget.user).get();
+    setState(() {
+      username = "${user['username']}#${user['discriminator']}";
+      profilePicture = user['profilePicture'] ?? '';
+    });
+  }
+
   Widget isUserMessage() {
-    if (user == currentUser) {
+    if (widget.user == widget.currentUser) {
       return IconButton(
-        onPressed: deleteMessage,
+        onPressed: widget.deleteMessage,
         icon: const Icon(
           Icons.delete,
           color: Colors.red,
@@ -42,17 +66,7 @@ class MessagePost extends StatelessWidget {
         padding: const EdgeInsets.all(25),
         child: Row(
           children: [
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.grey[400],
-                shape: BoxShape.circle,
-              ),
-              padding: const EdgeInsets.all(10),
-              child: const Icon(
-                Icons.person,
-                color: Colors.white,
-              ),
-            ),
+            ProfilePicture(profilePictureUrl: profilePicture, size: 60),
             const SizedBox(width: 20),
             Expanded(
               child: Column(
@@ -62,7 +76,7 @@ class MessagePost extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        user,
+                        username,
                         style: TextStyle(
                           color: Colors.grey[500],
                         ),
@@ -70,7 +84,7 @@ class MessagePost extends StatelessWidget {
                       Row(
                         children: [
                           Text(
-                            timestamp ?? '',
+                            widget.timestamp ?? '',
                             style: TextStyle(
                               color: Colors.grey[500],
                             ),
@@ -81,7 +95,7 @@ class MessagePost extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 10),
-                  Text(message),
+                  Text(widget.message),
                 ],
               ),
             ),
