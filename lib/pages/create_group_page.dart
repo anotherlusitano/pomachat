@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:my_pap/components/big_text_field.dart';
 import 'package:my_pap/components/primary_button.dart';
 import 'package:my_pap/components/profile_picture.dart';
 import 'package:my_pap/components/validated_text_field.dart';
@@ -148,10 +149,9 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
                     maxLenght: 128,
                   ),
                   const SizedBox(height: 25),
-                  ValidatedTextFormField(
+                  BigTextFormField(
                     controller: groupDescriptionTextController,
                     hintText: 'Descrição do grupo',
-                    obscureText: false,
                     maxLenght: 252,
                     maxLines: 4,
                   ),
