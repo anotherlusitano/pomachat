@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:my_pap/components/file_post.dart';
 import 'package:my_pap/components/image_post.dart';
 import 'package:my_pap/components/message_post.dart';
+import 'package:my_pap/components/profile_picture.dart';
 import 'package:my_pap/components/validated_text_field.dart';
 import 'package:my_pap/providers/get_group_id.dart';
 import 'package:provider/provider.dart';
@@ -27,6 +28,8 @@ class _GroupConversationPageState extends State<GroupConversationPage> {
 
   String? groupId;
 
+  Map<String, dynamic>? groupData = {};
+
   late String profilePicture;
 
   late Reference ref;
@@ -46,17 +49,39 @@ class _GroupConversationPageState extends State<GroupConversationPage> {
     });
   }
 
+  Future<void> getGroupName() async {
+    final documentSnapshot = await FirebaseFirestore.instance.collection('Groups').doc(groupId).get();
+    setState(() {
+      groupData = documentSnapshot.data();
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     groupId = Provider.of<GetGroupId>(context).groupId;
+    getGroupName();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Group Conversation'),
+        title: GestureDetector(
+          onTap: () => print("lol"),
+          child: Row(
+            children: [
+              ProfilePicture(profilePictureUrl: groupData?['icon_group'] ?? '', size: 34),
+              const SizedBox(width: 15),
+              Text(groupData?['name'] ?? 'Grupo'),
+            ],
+          ),
+        ),
         backgroundColor: Colors.grey[900],
       ),
       body: Center(
