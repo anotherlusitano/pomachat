@@ -6,6 +6,7 @@ class ValidatedTextFormField extends StatelessWidget {
   final String hintText;
   final bool obscureText;
   final int maxLenght;
+  final int? maxLines;
   final List<TextInputFormatter>? filters;
 
   const ValidatedTextFormField({
@@ -15,6 +16,7 @@ class ValidatedTextFormField extends StatelessWidget {
     required this.obscureText,
     required this.maxLenght,
     this.filters,
+    this.maxLines,
   });
 
   @override
@@ -36,6 +38,7 @@ class ValidatedTextFormField extends StatelessWidget {
         hintText: hintText,
         hintStyle: TextStyle(color: Colors.grey[500]),
       ),
+      maxLines: maxLines,
       inputFormatters: filters,
     );
   }
