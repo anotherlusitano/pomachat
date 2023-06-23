@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:my_pap/components/group_list_item.dart';
+import 'package:my_pap/pages/create_group_page.dart';
 import 'package:my_pap/pages/group_conversation_page.dart';
 import 'package:my_pap/providers/get_group_id.dart';
 import 'package:provider/provider.dart';
@@ -22,6 +23,20 @@ class _GroupsPageState extends State<GroupsPage> {
       appBar: AppBar(
         title: const Text('Grupos'),
         backgroundColor: Colors.grey[900],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const CreateGroupPage()),
+          );
+        },
+        backgroundColor: Colors.blueGrey,
+        child: const FittedBox(
+          child: Icon(
+            Icons.add,
+          ),
+        ),
       ),
       body: Center(
         child: Column(
