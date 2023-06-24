@@ -9,6 +9,7 @@ import 'package:my_pap/components/image_post.dart';
 import 'package:my_pap/components/message_post.dart';
 import 'package:my_pap/components/profile_picture.dart';
 import 'package:my_pap/components/validated_text_field.dart';
+import 'package:my_pap/pages/group_information_page.dart';
 import 'package:my_pap/providers/get_group_id.dart';
 import 'package:provider/provider.dart';
 
@@ -73,7 +74,14 @@ class _GroupConversationPageState extends State<GroupConversationPage> {
     return Scaffold(
       appBar: AppBar(
         title: GestureDetector(
-          onTap: () => print("lol"),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => GroupInformationPage(
+                groupId: groupId,
+              ),
+            ),
+          ),
           child: Row(
             children: [
               ProfilePicture(profilePictureUrl: groupData?['icon_group'] ?? '', size: 34),
