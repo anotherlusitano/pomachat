@@ -179,6 +179,30 @@ class _GroupInformationPageState extends State<GroupInformationPage> {
     );
   }
 
+  leaveGroup(List<dynamic> currentMembers, String memberUid) async {
+    currentMembers.remove(memberUid);
+
+    await FirebaseFirestore.instance.collection('Groups').doc(widget.groupId).update({
+      'members': currentMembers,
+    });
+
+    // after leave the group
+    // will show a snaskbar to confirm that leave the group
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        backgroundColor: Colors.lightGreen,
+        content: Text('Saiste do grupo!'),
+      ),
+    );
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const GroupsPage(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final currentUser = FirebaseAuth.instance.currentUser;
@@ -334,12 +358,18 @@ class _GroupInformationPageState extends State<GroupInformationPage> {
                     ? SizedBox(
                         width: 300,
                         height: 70,
-                        child: PrimaryButton(onTap: deleteGroup, text: 'Apagar grupo'),
+                        child: PrimaryButton(
+                          onTap: deleteGroup,
+                          text: 'Apagar grupo',
+                        ),
                       )
                     : SizedBox(
                         width: 300,
                         height: 70,
-                        child: PrimaryButton(onTap: null, text: 'Sair do grupo'),
+                        child: PrimaryButton(
+                          onTap: () => leaveGroup(members, currentUser.uid),
+                          text: 'Sair do grupo',
+                        ),
                       ),
 
                 const SizedBox(height: 15),
