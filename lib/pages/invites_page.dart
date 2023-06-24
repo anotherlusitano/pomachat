@@ -61,6 +61,12 @@ class _InvitesPageState extends State<InvitesPage> {
     });
   }
 
+  declineInvite(String userId) {
+    userCollection.update({
+      "invites": FieldValue.arrayRemove([userId])
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -101,12 +107,40 @@ class _InvitesPageState extends State<InvitesPage> {
                                     final discriminator = snapshot.data!['discriminator'];
                                     final pictureUrl = snapshot.data!['profilePicture'];
 
-                                    return GestureDetector(
-                                      onTap: () => acceptInvite(userId),
-                                      child: ProfileListItem(
-                                        bio: bio,
-                                        username: "$username#$discriminator",
-                                        pictureUrl: pictureUrl,
+                                    return Expanded(
+                                      child: Stack(
+                                        children: [
+                                          ProfileListItem(
+                                            bio: bio,
+                                            username: "$username#$discriminator",
+                                            pictureUrl: pictureUrl,
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.all(40),
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.end,
+                                              children: [
+                                                IconButton(
+                                                  onPressed: () => acceptInvite(userId),
+                                                  icon: const Icon(
+                                                    Icons.check,
+                                                    color: Colors.green,
+                                                    size: 42,
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 10),
+                                                IconButton(
+                                                  onPressed: () => declineInvite(userId),
+                                                  icon: const Icon(
+                                                    Icons.close,
+                                                    color: Colors.red,
+                                                    size: 42,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     );
                                   } else if (snapshot.connectionState == ConnectionState.waiting) {
