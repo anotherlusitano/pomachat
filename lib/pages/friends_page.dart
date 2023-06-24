@@ -50,6 +50,22 @@ class _FriendsPageState extends State<FriendsPage> {
     }).catchError((error) => print('Failed to get querySnapshot1: $error'));
   }
 
+  deleteFriend(List<dynamic> currentFriends, String friendId) async {
+    currentFriends.remove(friendId);
+
+    await FirebaseFirestore.instance.collection('Users').doc(currentUser!.uid).update({
+      'friends': currentFriends,
+    });
+
+    final friend = await FirebaseFirestore.instance.collection('Users').doc(friendId).get();
+    final friendListOfFriends = friend['friends'];
+    friendListOfFriends.remove(currentUser!.uid);
+
+    await FirebaseFirestore.instance.collection('Users').doc(friendId).update({
+      'friends': friendListOfFriends,
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -89,6 +105,8 @@ class _FriendsPageState extends State<FriendsPage> {
                                     final bio = snapshot.data!['bio'];
                                     final discriminator = snapshot.data!['discriminator'];
                                     final pictureUrl = snapshot.data!['profilePicture'];
+                                    final friendsList = snapshot.data!['friends'];
+                                    final friendId = snapshot.data!.id;
 
                                     return GestureDetector(
                                       onTap: () {
@@ -99,10 +117,27 @@ class _FriendsPageState extends State<FriendsPage> {
                                           MaterialPageRoute(builder: (context) => const PrivateConversationPage()),
                                         );
                                       },
-                                      child: ProfileListItem(
-                                        bio: bio,
-                                        username: "$username#$discriminator",
-                                        pictureUrl: pictureUrl,
+                                      child: Stack(
+                                        children: [
+                                          ProfileListItem(
+                                            bio: bio,
+                                            username: "$username#$discriminator",
+                                            pictureUrl: pictureUrl,
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.all(16),
+                                            child: Align(
+                                              alignment: Alignment.bottomRight,
+                                              child: IconButton(
+                                                onPressed: () => deleteFriend(friendsList, friendId),
+                                                icon: const Icon(
+                                                  Icons.delete,
+                                                  color: Colors.red,
+                                                ),
+                                              ),
+                                            ),
+                                          )
+                                        ],
                                       ),
                                     );
                                   } else if (snapshot.connectionState == ConnectionState.waiting) {
