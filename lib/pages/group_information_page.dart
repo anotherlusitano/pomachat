@@ -4,9 +4,11 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:my_pap/components/primary_button.dart';
 import 'package:my_pap/components/profile_list_item.dart';
 import 'package:my_pap/components/profile_picture.dart';
 import 'package:my_pap/components/text_box.dart';
+import 'package:my_pap/pages/groups_page.dart';
 
 class GroupInformationPage extends StatefulWidget {
   final String? groupId;
@@ -123,6 +125,58 @@ class _GroupInformationPageState extends State<GroupInformationPage> {
         field: newValue,
       });
     }
+  }
+
+  deleteGroup() async {
+    final CollectionReference messagesRef =
+        FirebaseFirestore.instance.collection('Groups').doc(widget.groupId).collection('Messages');
+
+    QuerySnapshot querySnapshot;
+    DocumentSnapshot lastDoc;
+
+    do {
+      querySnapshot = await messagesRef.limit(500).get();
+
+      final WriteBatch writeBatch = FirebaseFirestore.instance.batch();
+
+      for (DocumentSnapshot docSnapshot in querySnapshot.docs) {
+        writeBatch.delete(docSnapshot.reference);
+        lastDoc = docSnapshot;
+      }
+
+      await writeBatch.commit();
+    } while (querySnapshot.size > 0);
+
+    // delete the "Messages" subcollection
+    await FirebaseFirestore.instance
+        .collection('Groups')
+        .doc(widget.groupId)
+        .collection('Messages')
+        .get()
+        .then((querySnapshot) {
+      querySnapshot.docs.forEach((doc) {
+        doc.reference.delete();
+      });
+    });
+
+    // delete the "Groups" document
+    await FirebaseFirestore.instance.collection('Groups').doc(widget.groupId).delete();
+
+    // after delete the group
+    // will show a snaskbar to confirm that the group was deleted
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        backgroundColor: Colors.lightGreen,
+        content: Text('Grupo apagado!'),
+      ),
+    );
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const GroupsPage(),
+      ),
+    );
   }
 
   @override
@@ -273,6 +327,22 @@ class _GroupInformationPageState extends State<GroupInformationPage> {
                         );
                       }),
                 ),
+
+                const Divider(),
+                const SizedBox(height: 15),
+                groupData['admin'] == currentUser.uid
+                    ? SizedBox(
+                        width: 300,
+                        height: 70,
+                        child: PrimaryButton(onTap: deleteGroup, text: 'Apagar grupo'),
+                      )
+                    : SizedBox(
+                        width: 300,
+                        height: 70,
+                        child: PrimaryButton(onTap: null, text: 'Sair do grupo'),
+                      ),
+
+                const SizedBox(height: 15),
               ],
             );
           } else if (snapshot.hasError) {
