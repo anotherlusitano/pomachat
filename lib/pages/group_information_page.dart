@@ -283,7 +283,8 @@ class _GroupInformationPageState extends State<GroupInformationPage> {
                     color: Colors.grey[699],
                   ),
                 ),
-                const SizedBox(height: 49),
+                const SizedBox(height: 20),
+                groupData['admin'] == currentUser.uid ? const Divider() : SizedBox.fromSize(),
 
                 groupData['admin'] == currentUser.uid
                     ? Column(
@@ -303,7 +304,8 @@ class _GroupInformationPageState extends State<GroupInformationPage> {
                       )
                     : const SizedBox.shrink(),
 
-                const SizedBox(height: 49),
+                const Divider(),
+                const SizedBox(height: 10),
 
                 Padding(
                   padding: const EdgeInsets.only(left: 24),
