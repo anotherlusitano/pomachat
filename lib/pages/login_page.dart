@@ -56,44 +56,54 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Container(
+        child: SizedBox(
           height: Layout.pixel5Height,
-          width: Layout.pixel5Width,
-          color: Colors.grey[300],
+          width: 600,
           child: SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 25.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
-                    Icons.lock,
-                    size: 100,
+                  Image.asset(
+                    'assets/pomachat.png',
+                    width: 300,
+                    height: 300,
                   ),
                   Text(
-                    'Bem-vindo de volta!',
+                    'Bem-vindo!',
                     style: TextStyle(
                       color: Colors.grey[700],
+                      fontSize: 54,
                     ),
                   ),
                   const SizedBox(height: 25),
-                  ValidatedTextFormField(
-                    controller: emailTextController,
-                    hintText: 'Email',
-                    obscureText: false,
-                    maxLenght: 128,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 40),
+                    child: ValidatedTextFormField(
+                      controller: emailTextController,
+                      hintText: 'Email',
+                      obscureText: false,
+                      maxLenght: 128,
+                    ),
                   ),
                   const SizedBox(height: 25),
-                  ValidatedTextFormField(
-                    controller: passwordTextController,
-                    hintText: 'Palavra-passe',
-                    obscureText: true,
-                    maxLenght: 64,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 40),
+                    child: ValidatedTextFormField(
+                      controller: passwordTextController,
+                      hintText: 'Palavra-passe',
+                      obscureText: true,
+                      maxLenght: 64,
+                    ),
                   ),
                   const SizedBox(height: 25),
-                  PrimaryButton(
-                    onTap: signIn,
-                    text: 'Sign In',
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 80),
+                    child: PrimaryButton(
+                      onTap: signIn,
+                      text: 'Entrar',
+                    ),
                   ),
                   const SizedBox(height: 25),
                   Row(
@@ -108,7 +118,7 @@ class _LoginPageState extends State<LoginPage> {
                       TextButton(
                         onPressed: widget.onTap,
                         child: const Text(
-                          'Cria agora!',
+                          'Cria aqui!',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.blue,
