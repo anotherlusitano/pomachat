@@ -9,6 +9,7 @@ import 'package:my_pap/components/profile_list_item.dart';
 import 'package:my_pap/components/profile_picture.dart';
 import 'package:my_pap/components/text_box.dart';
 import 'package:my_pap/pages/groups_page.dart';
+import 'package:my_pap/pages/invite_members_page.dart';
 
 class GroupInformationPage extends StatefulWidget {
   final String? groupId;
@@ -308,14 +309,38 @@ class _GroupInformationPageState extends State<GroupInformationPage> {
                 const SizedBox(height: 10),
 
                 Padding(
-                  padding: const EdgeInsets.only(left: 24),
-                  child: Text(
-                    'Membros do grupo',
-                    style: TextStyle(
-                      color: Colors.grey[599],
-                    ),
+                  padding: const EdgeInsets.only(left: 24, right: 24),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const SizedBox.shrink(),
+                      Text(
+                        'Membros do grupo',
+                        style: TextStyle(
+                          color: Colors.grey[599],
+                        ),
+                      ),
+                      groupData['admin'] == currentUser.uid
+                          ? FloatingActionButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => InviteMembersPage(
+                                      groupId: widget.groupId,
+                                    ),
+                                  ),
+                                );
+                              },
+                              tooltip: 'Convidar amigos',
+                              backgroundColor: Colors.blueGrey,
+                              child: const Icon(Icons.email),
+                            )
+                          : const SizedBox.shrink(),
+                    ],
                   ),
                 ),
+
                 const SizedBox(height: 15),
 
                 Expanded(
