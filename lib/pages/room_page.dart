@@ -6,8 +6,8 @@ import 'package:peerdart/peerdart.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 class Room extends StatefulWidget {
-  String conversationId;
-  Room({
+  final String conversationId;
+  const Room({
     super.key,
     required this.conversationId,
   });
