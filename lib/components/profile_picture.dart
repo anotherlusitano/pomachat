@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 class ProfilePicture extends StatelessWidget {
-  String profilePictureUrl;
-  double size;
+  final String profilePictureUrl;
+  final double size;
 
-  ProfilePicture({
+  const ProfilePicture({
     super.key,
     required this.profilePictureUrl,
     required this.size,
