@@ -61,11 +61,23 @@ class _GroupInformationPageState extends State<GroupInformationPage> {
     }
   }
 
-  deleteMember(List<dynamic> currentMembers, String memberUid) async {
-    currentMembers.remove(memberUid);
+  deleteMember(String memberUid) async {
+    final messagesCollection =
+        FirebaseFirestore.instance.collection('Groups').doc(widget.groupId).collection('Messages');
+
+    QuerySnapshot querySnapshot;
+    do {
+      querySnapshot = await messagesCollection.where('user', isEqualTo: memberUid).limit(500).get();
+
+      final batch = FirebaseFirestore.instance.batch();
+      for (DocumentSnapshot docSnapshot in querySnapshot.docs) {
+        batch.delete(docSnapshot.reference);
+      }
+      await batch.commit();
+    } while (querySnapshot.size > 0);
 
     await FirebaseFirestore.instance.collection('Groups').doc(widget.groupId).update({
-      'members': currentMembers,
+      'members': FieldValue.arrayRemove([memberUid]),
     });
   }
 
@@ -132,7 +144,6 @@ class _GroupInformationPageState extends State<GroupInformationPage> {
         FirebaseFirestore.instance.collection('Groups').doc(widget.groupId).collection('Messages');
 
     QuerySnapshot querySnapshot;
-    DocumentSnapshot lastDoc;
 
     do {
       querySnapshot = await messagesRef.limit(500).get();
@@ -141,7 +152,6 @@ class _GroupInformationPageState extends State<GroupInformationPage> {
 
       for (DocumentSnapshot docSnapshot in querySnapshot.docs) {
         writeBatch.delete(docSnapshot.reference);
-        lastDoc = docSnapshot;
       }
 
       await writeBatch.commit();
@@ -331,7 +341,7 @@ class _GroupInformationPageState extends State<GroupInformationPage> {
                                               child: Align(
                                                 alignment: Alignment.bottomRight,
                                                 child: IconButton(
-                                                  onPressed: () => deleteMember(members, snapshot.data!.id),
+                                                  onPressed: () => deleteMember(snapshot.data!.id),
                                                   icon: const Icon(
                                                     Icons.delete,
                                                     color: Colors.red,
