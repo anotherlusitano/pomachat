@@ -4,6 +4,8 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:my_pap/auth/auth.dart';
+import 'package:my_pap/components/primary_button.dart';
 import 'package:my_pap/components/profile_picture.dart';
 import 'package:my_pap/components/text_box.dart';
 
@@ -121,6 +123,261 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  showWarning() async {
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Apagar a Conta"),
+          content: SizedBox(
+            width: 200,
+            height: 80,
+            child: Column(
+              children: const [
+                Text("Tens a certeza que queres apagar a conta?"),
+                Text("Este processo pode levar alguns minutos."),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: deleteAccount,
+              child: const Text("Sim"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text("Não"),
+            )
+          ],
+        );
+      },
+    );
+  }
+
+  deleteAccount() async {
+    Navigator.of(context).pop();
+
+    // Show CircularProgressIndicator
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      },
+    );
+
+    try {
+      // Perform Firestore querys
+      deleteInvites();
+      deleteFriends();
+      deletePrivateConversations();
+      leaveGroups();
+      deleteGroups();
+      await FirebaseFirestore.instance.collection('Users').doc(currentUser!.uid).delete();
+
+      await currentUser!.delete();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Colors.lightGreen,
+          content: Text('Conta apagada com sucesso!'),
+        ),
+      );
+
+      // After deleting, navigate to Login page
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const AuthPage(),
+        ),
+      );
+    } catch (e) {
+      // Handle exceptions
+      print('Error deleting account: $e');
+    }
+  }
+
+  deleteFriends() async {
+    final usersCollection = FirebaseFirestore.instance.collection('Users');
+
+    final querySnapshot = await usersCollection.where('friends', arrayContains: currentUser!.uid).get();
+
+    for (DocumentSnapshot docSnapshot in querySnapshot.docs) {
+      final docReference = docSnapshot.reference;
+
+      await docReference.update({
+        'friends': FieldValue.arrayRemove([currentUser!.uid])
+      });
+      print('Updated friends list of user ${docSnapshot.id}');
+    }
+  }
+
+  deleteInvites() async {
+    final usersCollection = FirebaseFirestore.instance.collection('Users');
+
+    final querySnapshot = await usersCollection.where('invites', arrayContains: currentUser!.uid).get();
+
+    for (DocumentSnapshot docSnapshot in querySnapshot.docs) {
+      final docReference = docSnapshot.reference;
+
+      await docReference.update({
+        'invites': FieldValue.arrayRemove([currentUser!.uid])
+      });
+    }
+  }
+
+  leaveGroups() async {
+    final groupCollection = FirebaseFirestore.instance.collection('Groups');
+
+    QuerySnapshot querySnapshot;
+
+    final querySnapsho = await groupCollection
+        .where('admin', isNotEqualTo: currentUser!.uid)
+        .where('members', arrayContains: currentUser!.uid)
+        .get();
+
+    for (DocumentSnapshot docSnapshot in querySnapsho.docs) {
+      final docReference = docSnapshot.reference;
+
+      // DELETE MESSAGES BEFORE LEAVING GROUP
+      //------------------------------------------------------------------------
+      final CollectionReference messagesRef =
+          FirebaseFirestore.instance.collection('Groups').doc(docReference.id).collection('Messages');
+
+      do {
+        querySnapshot = await messagesRef.limit(500).get();
+
+        final WriteBatch writeBatch = FirebaseFirestore.instance.batch();
+
+        for (DocumentSnapshot docSnapshot in querySnapshot.docs) {
+          writeBatch.delete(docSnapshot.reference);
+        }
+
+        await writeBatch.commit();
+      } while (querySnapshot.size > 0);
+      //------------------------------------------------------------------------
+
+      await docReference.update({
+        'members': FieldValue.arrayRemove([currentUser!.uid])
+      });
+    }
+  }
+
+  deleteGroups() async {
+    final groupCollection = FirebaseFirestore.instance.collection('Groups');
+
+    QuerySnapshot querySnapshot;
+
+    final querySnapsho = await groupCollection.where('admin', isEqualTo: currentUser!.uid).get();
+
+    for (DocumentSnapshot docSnapshot in querySnapsho.docs) {
+      final docReference = docSnapshot.reference;
+
+      // DELETE MESSAGES BEFORE LEAVING GROUP
+      //------------------------------------------------------------------------
+      final CollectionReference messagesRef =
+          FirebaseFirestore.instance.collection('Groups').doc(docReference.id).collection('Messages');
+
+      do {
+        querySnapshot = await messagesRef.limit(500).get();
+
+        final WriteBatch writeBatch = FirebaseFirestore.instance.batch();
+
+        for (DocumentSnapshot docSnapshot in querySnapshot.docs) {
+          writeBatch.delete(docSnapshot.reference);
+        }
+
+        await writeBatch.commit();
+      } while (querySnapshot.size > 0);
+      //------------------------------------------------------------------------
+
+      await docReference.delete();
+    }
+  }
+
+  deletePrivateConversations() async {
+    //we do two querys because firestore, in dart, dont't have
+    //the OR operator
+    await deletePrivateConversationsFirst();
+    await deletePrivateConversationsSecond();
+  }
+
+  deletePrivateConversationsFirst() async {
+    final privateConversationCollection = FirebaseFirestore.instance.collection('PrivateConversations');
+
+    QuerySnapshot querySnapshot;
+
+    final queryForFirstField = await privateConversationCollection
+        .where('user1', isEqualTo: currentUser!.uid)
+        .where('user2', isNotEqualTo: currentUser!.uid)
+        .get();
+
+    for (DocumentSnapshot docSnapshot in queryForFirstField.docs) {
+      final docReference = docSnapshot.reference;
+
+      // DELETE MESSAGES BEFORE DELETING PRIVATE CONVERSATION
+      //------------------------------------------------------------------------
+      final CollectionReference messagesRef =
+          FirebaseFirestore.instance.collection('PrivateConversations').doc(docReference.id).collection('Messages');
+
+      do {
+        querySnapshot = await messagesRef.limit(500).get();
+
+        final WriteBatch writeBatch = FirebaseFirestore.instance.batch();
+
+        for (DocumentSnapshot docSnapshot in querySnapshot.docs) {
+          writeBatch.delete(docSnapshot.reference);
+        }
+
+        await writeBatch.commit();
+      } while (querySnapshot.size > 0);
+      //------------------------------------------------------------------------
+
+      await docReference.delete();
+    }
+  }
+
+  deletePrivateConversationsSecond() async {
+    final privateConversationCollection = FirebaseFirestore.instance.collection('PrivateConversations');
+
+    QuerySnapshot querySnapshot;
+
+    //we do two querys because firestore, in dart, dont't have
+    //the OR operator
+    final queryForSecondField = await privateConversationCollection
+        .where('user1', isNotEqualTo: currentUser!.uid)
+        .where('user2', isEqualTo: currentUser!.uid)
+        .get();
+
+    for (DocumentSnapshot docSnapshot in queryForSecondField.docs) {
+      final docReference = docSnapshot.reference;
+
+      // DELETE MESSAGES BEFORE DELETING PRIVATE CONVERSATION
+      //------------------------------------------------------------------------
+      final CollectionReference messagesRef =
+          FirebaseFirestore.instance.collection('PrivateConversations').doc(docReference.id).collection('Messages');
+
+      do {
+        querySnapshot = await messagesRef.limit(500).get();
+
+        final WriteBatch writeBatch = FirebaseFirestore.instance.batch();
+
+        for (DocumentSnapshot docSnapshot in querySnapshot.docs) {
+          writeBatch.delete(docSnapshot.reference);
+        }
+
+        await writeBatch.commit();
+      } while (querySnapshot.size > 0);
+      //------------------------------------------------------------------------
+
+      await docReference.delete();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -201,6 +458,16 @@ class _ProfilePageState extends State<ProfilePage> {
                   text: userData['bio'],
                   sectionName: 'bio',
                   onPressed: () => editField('bio'),
+                ),
+
+                const SizedBox(height: 49),
+                SizedBox(
+                  width: 300,
+                  height: 70,
+                  child: PrimaryButton(
+                    onTap: showWarning,
+                    text: 'Apagar conta',
+                  ),
                 ),
               ],
             );
