@@ -61,6 +61,16 @@ class _InvitesPageState extends State<InvitesPage> {
     });
   }
 
+  acceptInviteGroup(String groupId) {
+    userCollection.update({
+      "invites": FieldValue.arrayRemove(['#$groupId'])
+    });
+
+    FirebaseFirestore.instance.collection('Groups').doc(groupId).update({
+      "members": FieldValue.arrayUnion([currentUser!.uid])
+    });
+  }
+
   declineInvite(String userId) {
     userCollection.update({
       "invites": FieldValue.arrayRemove([userId])
@@ -97,63 +107,136 @@ class _InvitesPageState extends State<InvitesPage> {
                             addAutomaticKeepAlives: false,
                             itemCount: invitesList.length,
                             itemBuilder: (context, index) {
-                              final userId = invitesList[index];
-                              return FutureBuilder<DocumentSnapshot>(
-                                future: FirebaseFirestore.instance.collection('Users').doc(userId).get(),
-                                builder: (context, snapshot) {
-                                  if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
-                                    final username = snapshot.data!['username'];
-                                    final bio = snapshot.data!['bio'];
-                                    final discriminator = snapshot.data!['discriminator'];
-                                    final pictureUrl = snapshot.data!['profilePicture'];
+                              final inviteId = invitesList[index];
 
-                                    return Expanded(
-                                      child: Stack(
-                                        children: [
-                                          ProfileListItem(
-                                            bio: bio,
-                                            username: "$username#$discriminator",
-                                            pictureUrl: pictureUrl,
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.all(40),
-                                            child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.end,
-                                              children: [
-                                                IconButton(
-                                                  onPressed: () => acceptInvite(userId),
-                                                  icon: const Icon(
-                                                    Icons.check,
-                                                    color: Colors.green,
-                                                    size: 42,
-                                                  ),
-                                                ),
-                                                const SizedBox(width: 10),
-                                                IconButton(
-                                                  onPressed: () => declineInvite(userId),
-                                                  icon: const Icon(
-                                                    Icons.close,
-                                                    color: Colors.red,
-                                                    size: 42,
-                                                  ),
-                                                ),
-                                              ],
+                              // this is the groups invites
+                              if (inviteId.toString().contains('#')) {
+                                return FutureBuilder<DocumentSnapshot>(
+                                  future: FirebaseFirestore.instance
+                                      .collection('Groups')
+                                      .doc(inviteId.toString().substring(1))
+                                      .get(),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
+                                      final name = snapshot.data!['name'];
+                                      final description = snapshot.data!['description'];
+                                      final groupIcon = snapshot.data!['icon_group'];
+                                      final members = snapshot.data!['members'];
+
+                                      return Expanded(
+                                        child: Stack(
+                                          children: [
+                                            ProfileListItem(
+                                              bio: description,
+                                              username: name,
+                                              pictureUrl: groupIcon,
                                             ),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  } else if (snapshot.connectionState == ConnectionState.waiting) {
-                                    return const Center(
-                                      child: CircularProgressIndicator(),
-                                    );
-                                  } else if (snapshot.hasError) {
-                                    return Text('Error fetching user data: ${snapshot.error}');
-                                  }
+                                            Padding(
+                                              padding: const EdgeInsets.all(40),
+                                              child: Row(
+                                                mainAxisAlignment: MainAxisAlignment.end,
+                                                children: [
+                                                  Column(
+                                                    children: [
+                                                      const Text('Membros'),
+                                                      Text(members.length.toString()),
+                                                    ],
+                                                  ),
+                                                  const VerticalDivider(),
+                                                  IconButton(
+                                                    onPressed: () => acceptInviteGroup(snapshot.data!.id),
+                                                    icon: const Icon(
+                                                      Icons.check,
+                                                      color: Colors.green,
+                                                      size: 42,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 10),
+                                                  IconButton(
+                                                    onPressed: () => declineInvite(inviteId),
+                                                    icon: const Icon(
+                                                      Icons.close,
+                                                      color: Colors.red,
+                                                      size: 42,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    } else if (snapshot.connectionState == ConnectionState.waiting) {
+                                      return const Center(
+                                        child: CircularProgressIndicator(),
+                                      );
+                                    } else if (snapshot.hasError) {
+                                      return Text('Error fetching user data: ${snapshot.error}');
+                                    }
 
-                                  return const SizedBox.shrink();
-                                },
-                              );
+                                    return const SizedBox.shrink();
+                                  },
+                                );
+                              }
+                              // this is for the users invites
+                              else {
+                                return FutureBuilder<DocumentSnapshot>(
+                                  future: FirebaseFirestore.instance.collection('Users').doc(inviteId).get(),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
+                                      final username = snapshot.data!['username'];
+                                      final bio = snapshot.data!['bio'];
+                                      final discriminator = snapshot.data!['discriminator'];
+                                      final pictureUrl = snapshot.data!['profilePicture'];
+
+                                      return Expanded(
+                                        child: Stack(
+                                          children: [
+                                            ProfileListItem(
+                                              bio: bio,
+                                              username: "$username#$discriminator",
+                                              pictureUrl: pictureUrl,
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.all(40),
+                                              child: Row(
+                                                mainAxisAlignment: MainAxisAlignment.end,
+                                                children: [
+                                                  IconButton(
+                                                    onPressed: () => acceptInvite(inviteId),
+                                                    icon: const Icon(
+                                                      Icons.check,
+                                                      color: Colors.green,
+                                                      size: 42,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 10),
+                                                  IconButton(
+                                                    onPressed: () => declineInvite(inviteId),
+                                                    icon: const Icon(
+                                                      Icons.close,
+                                                      color: Colors.red,
+                                                      size: 42,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    } else if (snapshot.connectionState == ConnectionState.waiting) {
+                                      return const Center(
+                                        child: CircularProgressIndicator(),
+                                      );
+                                    } else if (snapshot.hasError) {
+                                      return Text('Error fetching user data: ${snapshot.error}');
+                                    }
+
+                                    return const SizedBox.shrink();
+                                  },
+                                );
+                              }
                             },
                           );
                   }
