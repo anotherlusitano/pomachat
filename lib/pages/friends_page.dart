@@ -50,20 +50,46 @@ class _FriendsPageState extends State<FriendsPage> {
     }).catchError((error) => print('Failed to get querySnapshot1: $error'));
   }
 
-  deleteFriend(List<dynamic> currentFriends, String friendId) async {
-    currentFriends.remove(friendId);
-
+  deleteFriend(String friendId) async {
     await FirebaseFirestore.instance.collection('Users').doc(currentUser!.uid).update({
-      'friends': currentFriends,
+      'friends': FieldValue.arrayRemove([friendId]),
     });
-
-    final friend = await FirebaseFirestore.instance.collection('Users').doc(friendId).get();
-    final friendListOfFriends = friend['friends'];
-    friendListOfFriends.remove(currentUser!.uid);
 
     await FirebaseFirestore.instance.collection('Users').doc(friendId).update({
-      'friends': friendListOfFriends,
+      'friends': FieldValue.arrayRemove([currentUser!.uid]),
     });
+  }
+
+  showWarning(String friendUsername, String friendId) async {
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Acabar amizade"),
+          content: SizedBox(
+            width: 200,
+            height: 80,
+            child: Column(
+              children: [
+                Text("Tens a certeza que queres acabar a amizade com $friendUsername?"),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => deleteFriend(friendId),
+              child: const Text("Sim"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text("Não"),
+            )
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -105,7 +131,6 @@ class _FriendsPageState extends State<FriendsPage> {
                                     final bio = snapshot.data!['bio'];
                                     final discriminator = snapshot.data!['discriminator'];
                                     final pictureUrl = snapshot.data!['profilePicture'];
-                                    final friendsList = snapshot.data!['friends'];
                                     final friendId = snapshot.data!.id;
 
                                     return GestureDetector(
@@ -129,7 +154,7 @@ class _FriendsPageState extends State<FriendsPage> {
                                             child: Align(
                                               alignment: Alignment.bottomRight,
                                               child: IconButton(
-                                                onPressed: () => deleteFriend(friendsList, friendId),
+                                                onPressed: () => showWarning("$username#$discriminator", friendId),
                                                 icon: const Icon(
                                                   Icons.delete,
                                                   color: Colors.red,
