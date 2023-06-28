@@ -8,7 +8,7 @@ import 'package:my_pap/components/file_post.dart';
 import 'package:my_pap/components/image_post.dart';
 import 'package:my_pap/components/message_post.dart';
 import 'package:my_pap/components/validated_text_field.dart';
-import 'package:my_pap/pages/room_page.dart';
+import 'package:my_pap/pages/call_page.dart';
 import 'package:my_pap/providers/get_private_conversation_id.dart';
 import 'package:provider/provider.dart';
 
@@ -30,10 +30,14 @@ class _PrivateConversationPageState extends State<PrivateConversationPage> {
 
   late Reference ref;
 
-  void postMessage() {
+  void postMessage() async {
     if (textController.text.trim().isNotEmpty) {
       // store in firebase
-      FirebaseFirestore.instance.collection('PrivateConversations').doc(conversationId).collection('Messages').add({
+      await FirebaseFirestore.instance
+          .collection('PrivateConversations')
+          .doc(conversationId)
+          .collection('Messages')
+          .add({
         'user': currentUser!.uid,
         'message': textController.text,
         'timeStamp': Timestamp.now(),
@@ -65,7 +69,7 @@ class _PrivateConversationPageState extends State<PrivateConversationPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => Room(
+                  builder: (context) => CallPage(
                     conversationId: conversationId!,
                   ),
                 ),
