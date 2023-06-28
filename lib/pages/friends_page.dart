@@ -158,14 +158,6 @@ class _FriendsPageState extends State<FriendsPage> {
                 },
               ),
             ),
-            //logged in as
-            Text(
-              "Utilizador atual: ${currentUser!.email}",
-              style: const TextStyle(
-                color: Colors.grey,
-              ),
-            ),
-            const SizedBox(height: 50),
           ],
         ),
       ),
