@@ -9,6 +9,7 @@ import 'package:my_pap/components/profile_list_item.dart';
 import 'package:my_pap/components/profile_picture.dart';
 import 'package:my_pap/components/text_box.dart';
 import 'package:my_pap/pages/groups_page.dart';
+import 'package:my_pap/pages/home_page.dart';
 import 'package:my_pap/pages/invite_members_page.dart';
 
 class GroupInformationPage extends StatefulWidget {
@@ -249,7 +250,7 @@ class _GroupInformationPageState extends State<GroupInformationPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const GroupsPage(),
+        builder: (context) => const HomePage(),
       ),
     );
   }
