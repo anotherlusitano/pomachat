@@ -82,6 +82,38 @@ class _GroupInformationPageState extends State<GroupInformationPage> {
     });
   }
 
+  showWarningWhenDeletingMember(String memberUid, String memberUsername) async {
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Apagar membro"),
+          content: SizedBox(
+            width: 200,
+            height: 80,
+            child: Column(
+              children: [
+                Text("Tens a certeza que queres expulsar $memberUsername?"),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => deleteMember(memberUid),
+              child: const Text("Sim"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text("Não"),
+            )
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> editField(String field) async {
     String newValue = "";
     await showDialog(
@@ -368,7 +400,10 @@ class _GroupInformationPageState extends State<GroupInformationPage> {
                                               child: Align(
                                                 alignment: Alignment.bottomRight,
                                                 child: IconButton(
-                                                  onPressed: () => deleteMember(snapshot.data!.id),
+                                                  onPressed: () => showWarningWhenDeletingMember(
+                                                    snapshot.data!.id,
+                                                    "${userData['username']}#${userData['discriminator']}",
+                                                  ),
                                                   icon: const Icon(
                                                     Icons.delete,
                                                     color: Colors.red,
