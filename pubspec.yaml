@@ -47,6 +47,7 @@ dependencies:
   peerdart: ^0.5.0
   image_downloader_web: ^2.0.2
   url_launcher: ^6.1.11
+  uuid: ^3.0.7
 
 dev_dependencies:
   flutter_test:
