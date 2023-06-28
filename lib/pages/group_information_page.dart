@@ -172,6 +172,38 @@ class _GroupInformationPageState extends State<GroupInformationPage> {
     }
   }
 
+  showWarningWhenDeletingGroup() async {
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Apagar grupo"),
+          content: const SizedBox(
+            width: 200,
+            height: 80,
+            child: Column(
+              children: [
+                Text("Tens a certeza que queres apagar o grupo?"),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: deleteGroup,
+              child: const Text("Sim"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text("Não"),
+            )
+          ],
+        );
+      },
+    );
+  }
+
   deleteGroup() async {
     final CollectionReference messagesRef =
         FirebaseFirestore.instance.collection('Groups').doc(widget.groupId).collection('Messages');
@@ -431,7 +463,7 @@ class _GroupInformationPageState extends State<GroupInformationPage> {
                         width: 300,
                         height: 70,
                         child: PrimaryButton(
-                          onTap: deleteGroup,
+                          onTap: showWarningWhenDeletingGroup,
                           text: 'Apagar grupo',
                         ),
                       )
