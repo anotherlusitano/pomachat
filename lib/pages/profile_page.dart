@@ -129,11 +129,11 @@ class _ProfilePageState extends State<ProfilePage> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text("Apagar a Conta"),
-          content: SizedBox(
+          content: const SizedBox(
             width: 200,
             height: 80,
             child: Column(
-              children: const [
+              children: [
                 Text("Tens a certeza que queres apagar a conta?"),
                 Text("Este processo pode levar alguns minutos."),
               ],
