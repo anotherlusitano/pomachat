@@ -80,30 +80,28 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
                                     final discriminator = snapshot.data!['discriminator'];
                                     final pictureUrl = snapshot.data!['profilePicture'];
 
-                                    return Expanded(
-                                      child: Stack(
-                                        children: [
-                                          ProfileListItem(
-                                            bio: bio,
-                                            username: "$username#$discriminator",
-                                            pictureUrl: pictureUrl,
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.fromLTRB(40, 40, 50, 40),
-                                            child: Align(
-                                              alignment: Alignment.centerRight,
-                                              child: IconButton(
-                                                onPressed: () => sendInvite(),
-                                                icon: const Icon(
-                                                  Icons.email,
-                                                  color: Colors.blue,
-                                                  size: 42,
-                                                ),
+                                    return Stack(
+                                      children: [
+                                        ProfileListItem(
+                                          bio: bio,
+                                          username: "$username#$discriminator",
+                                          pictureUrl: pictureUrl,
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.fromLTRB(40, 40, 50, 40),
+                                          child: Align(
+                                            alignment: Alignment.centerRight,
+                                            child: IconButton(
+                                              onPressed: () => sendInvite(),
+                                              icon: const Icon(
+                                                Icons.email,
+                                                color: Colors.blue,
+                                                size: 42,
                                               ),
                                             ),
                                           ),
-                                        ],
-                                      ),
+                                        ),
+                                      ],
                                     );
                                   } else if (snapshot.connectionState == ConnectionState.waiting) {
                                     return const Center(
