@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:footer/footer.dart';
+import 'package:my_pap/components/call_snackbar.dart';
 import 'package:my_pap/components/profile_list_item.dart';
 
 class InviteMembersPage extends StatefulWidget {
@@ -19,10 +20,18 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
   final inviteController = TextEditingController();
   final pattern = RegExp(r'^[a-zA-Z0-9]+#\d{4}$');
 
-  sendInvite() {
-    if (pattern.hasMatch(inviteController.text)) {
-      String username = inviteController.text.split('#')[0];
-      String discriminator = inviteController.text.split('#')[1];
+  sendInvite([String? friendUsername, String? friendDiscriminator]) {
+    if (pattern.hasMatch(inviteController.text) || (friendUsername != null && friendDiscriminator != null)) {
+      String username = '';
+      String discriminator = '';
+
+      if (friendUsername != null && friendDiscriminator != null) {
+        username = friendUsername;
+        discriminator = friendDiscriminator;
+      } else {
+        username = inviteController.text.split('#')[0];
+        discriminator = inviteController.text.split('#')[1];
+      }
 
       // store in firebase
       FirebaseFirestore.instance
@@ -31,12 +40,31 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
           .where("discriminator", isEqualTo: discriminator)
           .get()
           .then(
-        (value) {
-          FirebaseFirestore.instance.collection('Users').doc(value.docs[0].id).update({
-            'members': FieldValue.arrayUnion(['#${widget.groupId}']),
-          });
+        (value) async {
+          final group = await FirebaseFirestore.instance.collection('Groups').doc(widget.groupId).get();
+          //verify if user is in the group
+          print(group['members'].contains(value.docs[0].id));
+          if (group['members'].contains(value.docs[0].id)) {
+            return SnackMsg.showInfo(context, 'Este utilizador já está no grupo!');
+          }
+          // verify if the user has the invite
+          else if (value.docs[0]['invites'].contains('#${widget.groupId}')) {
+            return SnackMsg.showInfo(context, 'Este utilizador já tem um convite');
+          } else {
+            //send invite to user
+            await FirebaseFirestore.instance.collection('Users').doc(value.docs[0].id).update({
+              'invites': FieldValue.arrayUnion(['#${widget.groupId}']),
+            });
+            return SnackMsg.showOk(context, 'Convite enviado!');
+          }
         },
-      ).catchError((error) => print('Error: $error'));
+      ).catchError((error) {
+        if (error.toString() == 'RangeError (index): Index out of range: no indices are valid: 0') {
+          SnackMsg.showError(context, 'Utilizador não existe!');
+        } else {
+          SnackMsg.showError(context, 'Ocorreu um erro: $error');
+        }
+      });
     }
 
     setState(() {
@@ -92,7 +120,7 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
                                           child: Align(
                                             alignment: Alignment.centerRight,
                                             child: IconButton(
-                                              onPressed: () => sendInvite(),
+                                              onPressed: () => sendInvite(username, discriminator),
                                               icon: const Icon(
                                                 Icons.email,
                                                 color: Colors.blue,
