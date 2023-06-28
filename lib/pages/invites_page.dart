@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:footer/footer.dart';
+import 'package:my_pap/components/call_snackbar.dart';
 import 'package:my_pap/components/profile_list_item.dart';
 
 class InvitesPage extends StatefulWidget {
@@ -30,12 +31,29 @@ class _InvitesPageState extends State<InvitesPage> {
           .where("discriminator", isEqualTo: discriminator)
           .get()
           .then(
-        (value) {
-          FirebaseFirestore.instance.collection('Users').doc(value.docs[0].id).update({
-            'invites': FieldValue.arrayUnion([currentUser!.uid]),
-          });
+        (value) async {
+          //verify if user is friend
+          if (value.docs[0]['friends'].contains(currentUser!.uid)) {
+            return SnackMsg.showInfo(context, 'Este utilizador já é teu amigo!');
+          }
+          // verify if the user has the invite
+          else if (value.docs[0]['invites'].contains(currentUser!.uid)) {
+            return SnackMsg.showInfo(context, 'Este utilizador já tem um convite');
+          } else {
+            //send invite to user
+            FirebaseFirestore.instance.collection('Users').doc(value.docs[0].id).update({
+              'invites': FieldValue.arrayUnion([currentUser!.uid]),
+            });
+            return SnackMsg.showOk(context, 'Convite enviado!');
+          }
         },
-      ).catchError((error) => print('Error: $error'));
+      ).catchError((error) {
+        if (error.toString() == 'RangeError (index): Index out of range: no indices are valid: 0') {
+          SnackMsg.showError(context, 'Utilizador não existe!');
+        } else {
+          SnackMsg.showError(context, 'Ocorreu um erro: $error');
+        }
+      });
     }
 
     setState(() {
