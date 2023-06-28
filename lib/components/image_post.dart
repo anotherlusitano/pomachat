@@ -33,6 +33,38 @@ class _ImagePostState extends State<ImagePost> {
     fetchUserData();
   }
 
+  showWarning() async {
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Apagar imagem"),
+          content: const SizedBox(
+            width: 200,
+            height: 80,
+            child: Column(
+              children: [
+                Text("Tens a certeza que queres apagar esta imagem?"),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: widget.deleteMessage,
+              child: const Text("Sim"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text("Não"),
+            )
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> fetchUserData() async {
     final user = await FirebaseFirestore.instance.collection('Users').doc(widget.user).get();
     setState(() {
@@ -44,7 +76,7 @@ class _ImagePostState extends State<ImagePost> {
   Widget isUserMessage() {
     if (widget.user == widget.currentUser) {
       return IconButton(
-        onPressed: widget.deleteMessage,
+        onPressed: showWarning,
         icon: const Icon(
           Icons.delete,
           color: Colors.red,
