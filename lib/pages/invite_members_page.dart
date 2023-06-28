@@ -43,7 +43,6 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
         (value) async {
           final group = await FirebaseFirestore.instance.collection('Groups').doc(widget.groupId).get();
           //verify if user is in the group
-          print(group['members'].contains(value.docs[0].id));
           if (group['members'].contains(value.docs[0].id)) {
             return SnackMsg.showInfo(context, 'Este utilizador já está no grupo!');
           }
