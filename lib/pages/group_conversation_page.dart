@@ -9,6 +9,7 @@ import 'package:my_pap/components/image_post.dart';
 import 'package:my_pap/components/message_post.dart';
 import 'package:my_pap/components/profile_picture.dart';
 import 'package:my_pap/components/validated_text_field.dart';
+import 'package:my_pap/pages/call_page.dart';
 import 'package:my_pap/pages/group_information_page.dart';
 import 'package:my_pap/providers/get_group_id.dart';
 import 'package:provider/provider.dart';
@@ -91,6 +92,22 @@ class _GroupConversationPageState extends State<GroupConversationPage> {
           ),
         ),
         backgroundColor: Colors.grey[900],
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.call),
+            tooltip: 'Fazer chamada',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CallPage(
+                    conversationId: '#$groupId',
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: Center(
         child: Column(
