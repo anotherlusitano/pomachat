@@ -17,7 +17,7 @@ class _InvitesPageState extends State<InvitesPage> {
   late final userCollection = FirebaseFirestore.instance.collection('Users').doc(currentUser!.uid);
 
   final inviteController = TextEditingController();
-  final pattern = RegExp(r'^[a-zA-Z0-9]+#\d{4}$');
+  final pattern = RegExp(r'^[^#]*#\d{4}$');
 
   sendInvite() {
     if (pattern.hasMatch(inviteController.text)) {
@@ -54,6 +54,8 @@ class _InvitesPageState extends State<InvitesPage> {
           SnackMsg.showError(context, 'Ocorreu um erro: $error');
         }
       });
+    } else {
+      SnackMsg.showError(context, 'Esse utilizador não é válido para enviar um convite!');
     }
 
     setState(() {
