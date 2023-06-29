@@ -25,7 +25,7 @@ class _ProfilePageState extends State<ProfilePage> {
   // all users
   final usersCollection = FirebaseFirestore.instance.collection('Users');
 
-  Future<void> editField(String field) async {
+  Future<void> editField(String field, Map<String, dynamic> data) async {
     String newValue = "";
     await showDialog(
       context: context,
@@ -38,19 +38,24 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ),
         content: TextField(
+          controller: field == 'username'
+              ? TextEditingController(text: data['username'])
+              : TextEditingController(text: data['bio']),
           autofocus: true,
           style: const TextStyle(color: Colors.white),
-          maxLength: 32,
+          maxLength: field == 'username' ? 32 : 252,
           decoration: InputDecoration(
             counterText: "",
-            hintText: 'Insira um novo $field',
+            hintText: field == 'username' ? 'Insira um novo username' : 'Insira uma nova biografia',
             hintStyle: const TextStyle(color: Colors.grey),
           ),
           onChanged: (value) {
             newValue = value;
           },
           inputFormatters: [
-            FilteringTextInputFormatter.allow(RegExp('[^#]*')),
+            field == 'username'
+                ? FilteringTextInputFormatter.deny(RegExp('[#]'))
+                : FilteringTextInputFormatter.deny(RegExp('[]*')),
           ],
         ),
         actions: [
@@ -65,7 +70,47 @@ class _ProfilePageState extends State<ProfilePage> {
 
           // save button
           TextButton(
-            onPressed: () => Navigator.of(context).pop(newValue),
+            onPressed: () async {
+              Navigator.of(context).pop(newValue);
+
+              if (newValue.trim().isNotEmpty) {
+                if (field == 'username') {
+                  // will verify if the username exists
+                  FirebaseFirestore.instance
+                      .collection('Users')
+                      .where("username", isEqualTo: newValue)
+                      .where("discriminator", isEqualTo: data['discriminator'])
+                      .get()
+                      .then(
+                    (value) async {
+                      // if user with username don't exist, will update the username
+                      if (value.docs.isEmpty) {
+                        usersCollection.doc(currentUser!.uid).update({field: newValue}).then(
+                          (value) => SnackMsg.showOk(context, 'Username alterado com sucesso!'),
+                        );
+                      } else {
+                        SnackMsg.showError(context, 'Já existe um utilizador com esse username, tente outro username!');
+                      }
+                    },
+                  ).catchError((error) {
+                    if (error.toString() == 'RangeError (index): Index out of range: no indices are valid: 0') {
+                      // else, will update the username
+                      usersCollection.doc(currentUser!.uid).update({field: newValue}).then(
+                        (value) => SnackMsg.showOk(context, 'Username alterado com sucesso!'),
+                      );
+                    } else {
+                      SnackMsg.showError(context, 'Ocorreu um erro: $error');
+                    }
+                  });
+                } else {
+                  usersCollection.doc(currentUser!.uid).update({field: newValue}).then(
+                    (value) => SnackMsg.showOk(context, 'Username alterado com sucesso!'),
+                  );
+                }
+              } else {
+                SnackMsg.showError(context, 'Não pode inserir um valor vazio');
+              }
+            },
             child: const Text(
               'Salvar',
               style: TextStyle(color: Colors.white),
@@ -74,11 +119,6 @@ class _ProfilePageState extends State<ProfilePage> {
         ],
       ),
     );
-
-    // update in firestore
-    if (newValue.trim().isNotEmpty) {
-      await usersCollection.doc(currentUser!.uid).update({field: newValue});
-    }
   }
 
   Future<void> updatePassword() async {
@@ -523,13 +563,13 @@ class _ProfilePageState extends State<ProfilePage> {
                 TextBox(
                   text: userData['username'],
                   sectionName: 'username',
-                  onPressed: () => editField('username'),
+                  onPressed: () => editField('username', userData),
                 ),
 
                 TextBox(
                   text: userData['bio'],
                   sectionName: 'bio',
-                  onPressed: () => editField('bio'),
+                  onPressed: () => editField('bio', userData),
                 ),
 
                 const SizedBox(height: 49),
