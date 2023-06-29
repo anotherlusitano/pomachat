@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:my_pap/auth/auth.dart';
+import 'package:my_pap/components/call_snackbar.dart';
 import 'package:my_pap/components/primary_button.dart';
 import 'package:my_pap/components/profile_picture.dart';
 import 'package:my_pap/components/text_box.dart';
@@ -77,6 +78,77 @@ class _ProfilePageState extends State<ProfilePage> {
     // update in firestore
     if (newValue.trim().isNotEmpty) {
       await usersCollection.doc(currentUser!.uid).update({field: newValue});
+    }
+  }
+
+  Future<void> updatePassword() async {
+    String newValue = "";
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.grey[900],
+        title: const Text(
+          'Alterar palavra-passe',
+          style: TextStyle(
+            color: Colors.white,
+          ),
+        ),
+        content: TextField(
+          autofocus: true,
+          style: const TextStyle(color: Colors.white),
+          maxLength: 64,
+          decoration: const InputDecoration(
+            counterText: "",
+            hintText: 'Insira uma nova palavra-passe',
+            hintStyle: TextStyle(color: Colors.grey),
+          ),
+          onChanged: (value) {
+            newValue = value;
+          },
+        ),
+        actions: [
+          // cancel button
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              'Cancelar',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+
+          // save button
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(newValue),
+            child: const Text(
+              'Salvar',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+    // update in firebase auth
+    if (newValue.trim().isNotEmpty) {
+      currentUser!
+          .updatePassword(newValue)
+          .then(
+            (_) => SnackMsg.showOk(context, 'Palavra-passe alterada com sucesso!'),
+          )
+          .catchError(
+        (error, stackTrace) {
+          print(error);
+          if (error.toString() ==
+              '[firebase_auth/unknown] An unknown error occurred: FirebaseError: Firebase: Password should be at least 6 characters (auth/weak-password).') {
+            SnackMsg.showError(context, 'Inseriu uma palavra-passe fraca, tente uma mais forte!');
+          } else if (error.toString() ==
+              '[firebase_auth/unknown] An unknown error occurred: FirebaseError: Firebase: This operation is sensitive and requires recent authentication. Log in again before retrying this request. (auth/requires-recent-login).') {
+            SnackMsg.showError(context,
+                'Ocorreu um erro ao verificar o seu utilizador! Saia e entre na conta para alterar a palavra-passe!');
+          } else {
+            SnackMsg.showError(context, 'Ocorreu um erro: $error');
+          }
+        },
+      );
     }
   }
 
@@ -461,13 +533,27 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
 
                 const SizedBox(height: 49),
-                SizedBox(
-                  width: 300,
-                  height: 70,
-                  child: PrimaryButton(
-                    onTap: showWarning,
-                    text: 'Apagar conta',
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 300,
+                      height: 70,
+                      child: PrimaryButton(
+                        onTap: showWarning,
+                        text: 'Apagar conta',
+                      ),
+                    ),
+                    const SizedBox(width: 50),
+                    SizedBox(
+                      width: 300,
+                      height: 70,
+                      child: PrimaryButton(
+                        onTap: updatePassword,
+                        text: 'Alterar palavra-passe',
+                      ),
+                    ),
+                  ],
                 ),
               ],
             );
