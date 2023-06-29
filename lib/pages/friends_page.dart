@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:my_pap/components/call_snackbar.dart';
 import 'package:my_pap/components/profile_list_item.dart';
 import 'package:my_pap/pages/private_conversation_page.dart';
 import 'package:my_pap/providers/get_friend_id.dart';
@@ -45,9 +46,13 @@ class _FriendsPageState extends State<FriendsPage> {
             // And will save the conversation id
             Provider.of<GetPrivateConversationId>(context, listen: false).updateFriendId(value.id);
           },
-        ).catchError((error) => print('Failed to add conversation: $error'));
+        ).catchError((error) {
+          SnackMsg.showError(context, 'Erro: $error');
+        });
       }
-    }).catchError((error) => print('Failed to get querySnapshot1: $error'));
+    }).catchError((error) {
+      SnackMsg.showError(context, 'Erro: $error');
+    });
   }
 
   deleteFriend(String friendId) async {
