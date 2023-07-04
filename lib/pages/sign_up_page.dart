@@ -26,6 +26,9 @@ class _SignUpPageState extends State<SignUpPage> {
 
   late final String discriminator = generateDiscriminator().toString();
 
+  bool obscurePwd = true;
+  bool obscureConfirmedPwd = true;
+
   String generateDiscriminator() {
     int randomNumber = Random().nextInt(9999 - 1) + 1;
     return randomNumber.toString().padLeft(4, '0');
@@ -166,21 +169,59 @@ class _SignUpPageState extends State<SignUpPage> {
                   const SizedBox(height: 25),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 40),
-                    child: ValidatedTextFormField(
-                      controller: passwordTextController,
-                      hintText: 'Palavra-passe',
-                      obscureText: true,
-                      maxLenght: 64,
+                    child: Stack(
+                      children: [
+                        SizedBox(
+                          width: 470,
+                          height: 51,
+                          child: ValidatedTextFormField(
+                            controller: passwordTextController,
+                            hintText: 'Palavra-passe',
+                            obscureText: obscurePwd,
+                            maxLenght: 64,
+                          ),
+                        ),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: IconButton(
+                            onPressed: () => setState(() {
+                              obscurePwd = !obscurePwd;
+                            }),
+                            icon: obscurePwd
+                                ? const Icon(Icons.visibility_off_outlined)
+                                : const Icon(Icons.visibility_outlined),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 25),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 40),
-                    child: ValidatedTextFormField(
-                      controller: confirmPasswordTextController,
-                      hintText: 'Confirmar palavra-passe',
-                      obscureText: true,
-                      maxLenght: 64,
+                    child: Stack(
+                      children: [
+                        SizedBox(
+                          width: 470,
+                          height: 51,
+                          child: ValidatedTextFormField(
+                            controller: confirmPasswordTextController,
+                            hintText: 'Confirmar palavra-passe',
+                            obscureText: obscureConfirmedPwd,
+                            maxLenght: 64,
+                          ),
+                        ),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: IconButton(
+                            onPressed: () => setState(() {
+                              obscureConfirmedPwd = !obscureConfirmedPwd;
+                            }),
+                            icon: obscureConfirmedPwd
+                                ? const Icon(Icons.visibility_off_outlined)
+                                : const Icon(Icons.visibility_outlined),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 25),
