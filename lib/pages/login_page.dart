@@ -19,6 +19,8 @@ class _LoginPageState extends State<LoginPage> {
   final emailTextController = TextEditingController();
   final passwordTextController = TextEditingController();
 
+  bool obscurePwd = true;
+
   void signIn() async {
     showDialog(
       context: context,
@@ -90,11 +92,30 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(height: 25),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 40),
-                    child: ValidatedTextFormField(
-                      controller: passwordTextController,
-                      hintText: 'Palavra-passe',
-                      obscureText: true,
-                      maxLenght: 64,
+                    child: Stack(
+                      children: [
+                        SizedBox(
+                          width: 470,
+                          height: 51,
+                          child: ValidatedTextFormField(
+                            controller: passwordTextController,
+                            hintText: 'Palavra-passe',
+                            obscureText: obscurePwd,
+                            maxLenght: 64,
+                          ),
+                        ),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: IconButton(
+                            onPressed: () => setState(() {
+                              obscurePwd = !obscurePwd;
+                            }),
+                            icon: obscurePwd
+                                ? const Icon(Icons.visibility_off_outlined)
+                                : const Icon(Icons.visibility_outlined),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 25),
